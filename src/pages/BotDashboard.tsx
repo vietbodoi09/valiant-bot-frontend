@@ -521,10 +521,11 @@ export default function BotDashboard() {
                     <select 
                       value={config.mode}
                       onChange={e => setConfig({...config, mode: e.target.value as 'spam' | 'hedge'})}
-                      className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-md text-white text-sm"
+                      className="w-full px-3 py-2 bg-black border border-white/10 rounded-md text-white text-sm appearance-none cursor-pointer relative z-10"
+                      style={{backgroundImage: 'none'}}
                     >
-                      <option value="hedge">Hedge</option>
-                      <option value="spam">Spam</option>
+                      <option value="hedge" className="bg-black text-white">Hedge</option>
+                      <option value="spam" className="bg-black text-white">Spam</option>
                     </select>
                   </div>
                   <div className="space-y-2">
@@ -532,11 +533,12 @@ export default function BotDashboard() {
                     <select 
                       value={config.symbol}
                       onChange={e => setConfig({...config, symbol: e.target.value})}
-                      className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-md text-white text-sm"
+                      className="w-full px-3 py-2 bg-black border border-white/10 rounded-md text-white text-sm appearance-none cursor-pointer relative z-10"
+                      style={{backgroundImage: 'none'}}
                     >
-                      <option value="BTC">BTC</option>
-                      <option value="ETH">ETH</option>
-                      <option value="SOL">SOL</option>
+                      <option value="BTC" className="bg-black text-white">BTC</option>
+                      <option value="ETH" className="bg-black text-white">ETH</option>
+                      <option value="SOL" className="bg-black text-white">SOL</option>
                     </select>
                   </div>
                 </div>
