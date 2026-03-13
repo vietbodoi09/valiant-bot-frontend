@@ -197,13 +197,10 @@ export default function BotDashboard() {
         const msg = JSON.parse(e.data);
         
         if (msg.type === 'log') {
-          // Batch logs instead of updating immediately
-          logBatch.push(msg.data);
-          if (logBatch.length >= 5) {
-            flushLogs();
-          } else if (!batchTimeout) {
-            batchTimeout = setTimeout(flushLogs, 100);
-          }
+          // Handle both array of logs and single log
+          const logs = Array.isArray(msg.data) ? msg.data : [msg.data];
+          logBatch.push(...logs);
+          flushLogs(); // Update immediately for real-time feel
         }
         else if (msg.type === 'state') {
           setIsRunning(msg.data.is_running);
