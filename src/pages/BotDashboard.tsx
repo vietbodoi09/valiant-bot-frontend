@@ -97,13 +97,17 @@ export default function BotDashboard() {
     const time = new Date().toLocaleTimeString();
     setLogs(prev => {
       const newLogs = [...prev, `[${time}] ${msg}`];
-      // Keep only last 100 logs to prevent memory issues
-      return newLogs.slice(-100);
+      // Keep only last 50 logs for better performance
+      return newLogs.slice(-50);
     });
   };
 
+  // Optimized scroll - only scroll to bottom every 500ms max
   useEffect(() => {
-    logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const timer = setTimeout(() => {
+      logsEndRef.current?.scrollIntoView({ behavior: 'auto' });
+    }, 100);
+    return () => clearTimeout(timer);
   }, [logs]);
 
   // Check backend connection on mount
@@ -716,7 +720,7 @@ export default function BotDashboard() {
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
-                <div className="h-80 overflow-y-auto rounded-lg bg-black/50 p-4 font-mono text-xs border border-white/5">
+                <div className="h-80 overflow-y-auto rounded-lg bg-black/50 p-4 font-mono text-xs border border-white/5" id="log-container">
                   {logs.length === 0 ? (
                     <div className="flex items-center justify-center h-full text-white/30">
                       <div className="text-center">
@@ -725,11 +729,16 @@ export default function BotDashboard() {
                       </div>
                     </div>
                   ) : (
-                    logs.map((log, i) => (
-                      <div key={i} className="text-green-400/90 mb-1 hover:bg-white/5 px-1 rounded">
-                        {log}
-                      </div>
-                    ))
+                    <>
+                      {logs.slice(-30).map((log, i) => (
+                        <div key={`${i}-${log.substring(0, 20)}`} className="text-green-400/90 mb-1 hover:bg-white/5 px-1 rounded whitespace-pre-wrap break-words">
+                          {log}
+                        </div>
+                      ))}
+                      {logs.length > 30 && (
+                        <div className="text-white/30 text-center py-2">... {logs.length - 30} older logs hidden ...</div>
+                      )}
+                    </>
                   )}
                   <div ref={logsEndRef} />
                 </div>
