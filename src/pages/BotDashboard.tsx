@@ -58,6 +58,7 @@ export default function BotDashboard() {
       valiant_master_address: '',
       lighter_api_key: '',
       lighter_account_index: '0',
+      lighter_api_key_index: '2',  // Default API key index (2-254)
     };
   });
 
@@ -257,6 +258,7 @@ export default function BotDashboard() {
             valiant_master_address: apiKeys.valiant_master_address,
             lighter_api_key: apiKeys.lighter_api_key,
             lighter_account_index: parseInt(apiKeys.lighter_account_index) || 0,
+            lighter_api_key_index: parseInt(apiKeys.lighter_api_key_index) || 2,
           }
         }),
       });
@@ -514,12 +516,23 @@ export default function BotDashboard() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-white/60 text-xs">Account Index</Label>
+                    <Label className="text-white/60 text-xs">Account ID</Label>
                     <Input 
                       type="number"
                       value={apiKeys.lighter_account_index}
                       onChange={e => setApiKeys({...apiKeys, lighter_account_index: e.target.value})}
                       className="bg-white/5 border-white/10 text-white"
+                      placeholder="e.g., 719083"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-white/60 text-xs">API Key Index</Label>
+                    <Input 
+                      type="number"
+                      value={apiKeys.lighter_api_key_index}
+                      onChange={e => setApiKeys({...apiKeys, lighter_api_key_index: e.target.value})}
+                      className="bg-white/5 border-white/10 text-white"
+                      placeholder="2-254"
                     />
                   </div>
                 </CardContent>
