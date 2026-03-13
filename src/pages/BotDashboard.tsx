@@ -583,7 +583,10 @@ export default function BotDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid md:grid-cols-2 gap-4">
-                    {positions?.map((pos, i) => (
+                    {positions?.map((pos, i) => {
+                      // Safe render with error handling
+                      try {
+                        return (
                       <div key={i} className="p-4 rounded-lg bg-white/5 border border-white/10">
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-2">
@@ -621,7 +624,12 @@ export default function BotDashboard() {
                           </div>
                         </div>
                       </div>
-                    ))}
+                        );
+                      } catch (e) {
+                        console.error('Error rendering position:', e);
+                        return <div key={i} className="p-4 text-red-400">Error loading position</div>;
+                      }
+                    })}
                   </div>
                 </CardContent>
               </Card>
