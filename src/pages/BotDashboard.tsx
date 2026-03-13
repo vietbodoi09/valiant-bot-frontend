@@ -290,19 +290,27 @@ export default function BotDashboard() {
     setLoading(true);
     addLog('Stopping bot and closing all positions...');
     
-    wsRef.current?.send(JSON.stringify({ action: 'stop' }));
-    
     try {
-      await fetch(`${API_URL}/api/stop/${sessionId}`, { method: 'POST' });
-      addLog('Bot stopped, all positions closed');
+      // Stop via REST API first
+      const res = await fetch(`${API_URL}/api/stop/${sessionId}`, { method: 'POST' });
+      if (res.ok) {
+        addLog('Bot stopped successfully');
+        setIsRunning(false);
+        setPositions([]);
+      } else {
+        addLog('Stop request failed');
+      }
     } catch (e: any) {
       addLog(`Stop error: ${e.message}`);
     }
     
+    // Close WebSocket
+    wsRef.current?.close();
+    setWsStatus('disconnected');
+    
     // Clear session from storage
     localStorage.removeItem('valiant_session_id');
     setSessionId(null);
-    setIsRunning(false);
     setLoading(false);
   };
 
