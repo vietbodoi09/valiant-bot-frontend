@@ -281,19 +281,26 @@ export default function BotDashboard() {
     setLoading(false);
   };
 
+  const [isStopping, setIsStopping] = useState(false);
+  
   const handleStop = async () => {
-    if (!sessionId) return;
+    if (!sessionId || isStopping) return;
     
+    setIsStopping(true);
     setLoading(true);
-    addLog('Stopping bot and closing all positions...');
     
     try {
       // Stop via REST API first
       const res = await fetch(`${API_URL}/api/stop/${sessionId}`, { method: 'POST' });
       if (res.ok) {
-        addLog('Bot stopped successfully');
-        setIsRunning(false);
-        setPositions([]);
+        const data = await res.json();
+        if (data.status === 'already_stopping') {
+          addLog('Stop already in progress...');
+        } else {
+          addLog('Bot stopped successfully');
+          setIsRunning(false);
+          setPositions([]);
+        }
       } else {
         addLog('Stop request failed');
       }
@@ -304,6 +311,7 @@ export default function BotDashboard() {
     // Close WebSocket
     wsRef.current?.close();
     setWsStatus('disconnected');
+    setIsStopping(false);
     
     // Clear session from storage
     localStorage.removeItem('valiant_session_id');
@@ -639,10 +647,11 @@ export default function BotDashboard() {
                   <Button 
                     onClick={handleStop}
                     variant="destructive"
+                    disabled={isStopping}
                     className="w-full"
                   >
-                    <Pause className="w-4 h-4 mr-2" />
-                    Stop Bot
+                    {isStopping ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Pause className="w-4 h-4 mr-2" />}
+                    {isStopping ? 'Stopping...' : 'Stop Bot'}
                   </Button>
                 )}
               </CardContent>
