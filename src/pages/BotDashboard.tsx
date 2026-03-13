@@ -591,6 +591,7 @@ export default function BotDashboard() {
                   </div>
                 )}
 
+                {/* Spam mode config - v2 */}
                 {config.mode === 'spam' && (
                   <>
                     <div className="grid grid-cols-2 gap-3">
