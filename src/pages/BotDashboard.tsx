@@ -323,7 +323,7 @@ export default function BotDashboard() {
     );
   }
 
-  const netPnl = positions.reduce((acc, p) => acc + (p.pnl || 0), 0);
+  const netPnl = positions?.reduce((acc, p) => acc + (p?.pnl || 0), 0) || 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#0d0d0d] to-[#0a0a0a]">
@@ -385,7 +385,7 @@ export default function BotDashboard() {
               <div className="flex items-center gap-2 text-white/40 text-sm mb-1">
                 <BarChart3 className="w-4 h-4" /> Trades
               </div>
-              <div className="text-2xl font-bold text-white">{stats.trades}</div>
+              <div className="text-2xl font-bold text-white">{stats?.trades || 0}</div>
             </CardContent>
           </Card>
           
@@ -394,7 +394,7 @@ export default function BotDashboard() {
               <div className="flex items-center gap-2 text-white/40 text-sm mb-1">
                 <Activity className="w-4 h-4" /> Volume
               </div>
-              <div className="text-2xl font-bold text-white">${stats.volume.toFixed(0)}</div>
+              <div className="text-2xl font-bold text-white">${(stats?.volume || 0).toFixed(0)}</div>
             </CardContent>
           </Card>
           
@@ -574,7 +574,7 @@ export default function BotDashboard() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Positions */}
-            {positions.length > 0 && (
+            {positions?.length > 0 && (
               <Card className="bg-black/40 backdrop-blur border-white/5">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-white flex items-center gap-2 text-base">
@@ -583,40 +583,40 @@ export default function BotDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid md:grid-cols-2 gap-4">
-                    {positions.map((pos, i) => (
+                    {positions?.map((pos, i) => (
                       <div key={i} className="p-4 rounded-lg bg-white/5 border border-white/10">
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-2">
                             <div className={cn(
                               'w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold',
-                              pos.exchange === 'hyperliquid' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'
+                              pos?.exchange === 'hyperliquid' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'
                             )}>
-                              {pos.exchange === 'hyperliquid' ? 'HL' : 'LT'}
+                              {pos?.exchange === 'hyperliquid' ? 'HL' : 'LT'}
                             </div>
-                            <span className="text-white font-medium">{pos.symbol}</span>
+                            <span className="text-white font-medium">{pos?.symbol || '-'}</span>
                           </div>
-                          <Badge variant={pos.side === 'long' ? 'default' : 'destructive'}
-                                 className={pos.side === 'long' ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}>
-                            {pos.side.toUpperCase()}
+                          <Badge variant={pos?.side === 'long' ? 'default' : 'destructive'}
+                                 className={pos?.side === 'long' ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}>
+                            {pos?.side?.toUpperCase() || '-'}
                           </Badge>
                         </div>
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
                             <div className="text-white/40 text-xs">Size</div>
-                            <div className="text-white">{pos.size.toFixed(6)}</div>
+                            <div className="text-white">{(pos?.size || 0).toFixed(6)}</div>
                           </div>
                           <div>
                             <div className="text-white/40 text-xs">Entry</div>
-                            <div className="text-white">${pos.entry_price?.toLocaleString()}</div>
+                            <div className="text-white">${pos?.entry_price?.toLocaleString() || '0'}</div>
                           </div>
                           <div>
                             <div className="text-white/40 text-xs">Mark</div>
-                            <div className="text-white">${pos.mark_price?.toLocaleString()}</div>
+                            <div className="text-white">${pos?.mark_price?.toLocaleString() || '0'}</div>
                           </div>
                           <div>
                             <div className="text-white/40 text-xs">PnL</div>
-                            <div className={pos.pnl >= 0 ? 'text-green-400' : 'text-red-400'}>
-                              {pos.pnl >= 0 ? '+' : ''}${pos.pnl?.toFixed(2)}
+                            <div className={(pos?.pnl || 0) >= 0 ? 'text-green-400' : 'text-red-400'}>
+                              {(pos?.pnl || 0) >= 0 ? '+' : ''}${(pos?.pnl || 0).toFixed(2)}
                             </div>
                           </div>
                         </div>
