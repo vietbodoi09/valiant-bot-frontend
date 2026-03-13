@@ -1,0 +1,184 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 4%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 6%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 6%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 14 100% 57%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 14 100% 57%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 14 100% 57%;
+    --radius: 0.625rem;
+    
+    --valiant-orange: 14 100% 57%;
+    --valiant-coral: 14 85% 50%;
+    --valiant-dark: 0 0% 8%;
+    --card-bg: 0 0% 8%;
+    --card-border: 0 0% 18%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+}
+
+@layer utilities {
+  .text-gradient-orange {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(14 100% 65%), hsl(14 100% 50%));
+  }
+  
+  .bg-gradient-orange {
+    background: linear-gradient(135deg, hsl(14 100% 57%), hsl(14 85% 50%));
+  }
+  
+  .glow-orange {
+    box-shadow: 0 0 20px rgba(255, 107, 53, 0.3), 0 0 40px rgba(255, 107, 53, 0.1);
+  }
+  
+  .glow-orange-sm {
+    box-shadow: 0 0 10px rgba(255, 107, 53, 0.2);
+  }
+  
+  .card-gradient {
+    background: linear-gradient(180deg, hsl(0 0% 10%) 0%, hsl(0 0% 6%) 100%);
+  }
+  
+  .progress-bar-orange {
+    background: linear-gradient(90deg, hsl(14 100% 57%), hsl(14 100% 65%));
+  }
+  
+  .hero-gradient-valiant {
+    background: linear-gradient(135deg, 
+      hsl(14 100% 35%) 0%, 
+      hsl(14 90% 25%) 50%,
+      hsl(0 0% 4%) 100%
+    );
+  }
+  
+  .glass-card {
+    @apply bg-white/5 backdrop-blur-sm border border-white/10;
+  }
+  
+  .nav-tab {
+    @apply px-4 py-2 rounded-full text-sm font-medium transition-all duration-200;
+  }
+  
+  .nav-tab-active {
+    @apply bg-white/10 text-white;
+  }
+  
+  .nav-tab-inactive {
+    @apply text-white/50 hover:text-white/80 hover:bg-white/5;
+  }
+  
+  .crypto-card {
+    @apply rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.08] to-white/[0.02] p-5;
+  }
+  
+  .stat-value {
+    @apply text-4xl md:text-5xl font-semibold text-white tracking-tight;
+  }
+  
+  .stat-label {
+    @apply text-xs uppercase tracking-wider text-white/50 mt-2;
+  }
+  
+  .btn-primary {
+    @apply px-6 py-3 bg-gradient-orange text-white font-medium rounded-full hover:opacity-90 transition-opacity;
+  }
+  
+  .btn-outline {
+    @apply px-6 py-3 border border-white/20 text-white font-medium rounded-full hover:bg-white/5 transition-colors;
+  }
+  
+  .badge-orange {
+    @apply px-2 py-0.5 text-xs font-medium bg-orange-500/20 text-orange-400 rounded-full;
+  }
+  
+  .badge-green {
+    @apply px-2 py-0.5 text-xs font-medium bg-green-500/20 text-green-400 rounded-full;
+  }
+  
+  .yield-positive {
+    @apply text-green-400;
+  }
+  
+  .yield-negative {
+    @apply text-red-400;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(0 0% 8%);
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(0 0% 20%);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(0 0% 25%);
+}
+
+/* Animation for countdown */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(255, 107, 53, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 107, 53, 0.4);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Chart animations */
+@keyframes chart-grow {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.animate-chart-grow {
+  animation: chart-grow 0.5s ease-out;
+  transform-origin: bottom;
+}
