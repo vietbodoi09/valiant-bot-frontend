@@ -83,6 +83,8 @@ export default function BotDashboard() {
       leverage: 10,
       hedge_hold_hours: 8,
       auto_reenter: true,
+      spam_rounds: 10,
+      spam_interval: 10,
     };
   });
 
@@ -575,6 +577,32 @@ export default function BotDashboard() {
                       className="bg-white/5 border-white/10 text-white"
                     />
                   </div>
+                )}
+
+                {config.mode === 'spam' && (
+                  <>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        <Label className="text-white/60 text-xs">Spam Rounds</Label>
+                        <Input 
+                          type="number"
+                          value={config.spam_rounds}
+                          onChange={e => setConfig({...config, spam_rounds: Number(e.target.value)})}
+                          className="bg-white/5 border-white/10 text-white"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-white/60 text-xs">Interval (seconds)</Label>
+                        <Input 
+                          type="number"
+                          step={1}
+                          value={config.spam_interval}
+                          onChange={e => setConfig({...config, spam_interval: Number(e.target.value)})}
+                          className="bg-white/5 border-white/10 text-white"
+                        />
+                      </div>
+                    </div>
+                  </>
                 )}
 
                 <div className="flex items-center gap-2">
