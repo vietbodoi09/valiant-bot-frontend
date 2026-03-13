@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
-const API_URL = 'https://1367-118-71-40-187.ngrok-free.app'; // Backend URL - no wallet required
+const API_URL = 'https://valiant-bot-be-01.fly.dev'; // Backend URL - no wallet required
 
 interface Position {
   symbol: string;
