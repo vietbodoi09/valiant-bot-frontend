@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { 
-  Play, Pause, Wallet, Key, Activity, RefreshCw, 
+  Play, Pause, Key, Activity, RefreshCw, 
   TrendingUp, Server, 
   Copy, ChevronDown, ChevronUp,
   BarChart3, DollarSign, Shield, Zap, Loader2
 } from 'lucide-react';
-import { useWallet } from '../hooks/useWallet';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,7 +26,6 @@ interface Position {
 }
 
 export default function BotDashboard() {
-  const { isConnected } = useWallet();
   
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isRunning, setIsRunning] = useState(false);
@@ -333,22 +332,6 @@ export default function BotDashboard() {
               <RefreshCw className="w-4 h-4 mr-2" />
               Retry Connection
             </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (!isConnected) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#111] to-[#0a0a0a] flex items-center justify-center">
-        <Card className="w-full max-w-md mx-4 bg-black/40 backdrop-blur-xl border-white/10">
-          <CardContent className="pt-8 pb-8 text-center">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-orange-500/20 to-orange-600/10 flex items-center justify-center border border-orange-500/20">
-              <Wallet className="w-10 h-10 text-orange-400" />
-            </div>
-            <h1 className="text-2xl font-bold text-white mb-2">Connect Wallet</h1>
-            <p className="text-white/50">Connect your wallet to access the bot dashboard</p>
           </CardContent>
         </Card>
       </div>
