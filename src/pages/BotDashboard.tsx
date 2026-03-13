@@ -44,21 +44,53 @@ export default function BotDashboard() {
   const wsRef = useRef<WebSocket | null>(null);
   const logsEndRef = useRef<HTMLDivElement>(null);
   
-  const [apiKeys, setApiKeys] = useState({
-    valiant_agent_key: '',
-    valiant_master_address: '',
-    lighter_api_key: '',
-    lighter_account_index: '0',
+  const [apiKeys, setApiKeys] = useState(() => {
+    // Load from localStorage on init
+    const saved = localStorage.getItem('valiant_api_keys');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to parse saved API keys:', e);
+      }
+    }
+    return {
+      valiant_agent_key: '',
+      valiant_master_address: '',
+      lighter_api_key: '',
+      lighter_account_index: '0',
+    };
   });
+
+  // Save to localStorage when apiKeys change
+  useEffect(() => {
+    localStorage.setItem('valiant_api_keys', JSON.stringify(apiKeys));
+  }, [apiKeys]);
   
-  const [config, setConfig] = useState({
-    mode: 'hedge' as 'spam' | 'hedge',
-    symbol: 'BTC',
-    size_usd: 150,
-    leverage: 10,
-    hedge_hold_hours: 8,
-    auto_reenter: true,
+  const [config, setConfig] = useState(() => {
+    // Load from localStorage on init
+    const saved = localStorage.getItem('valiant_config');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to parse saved config:', e);
+      }
+    }
+    return {
+      mode: 'hedge' as 'spam' | 'hedge',
+      symbol: 'BTC',
+      size_usd: 150,
+      leverage: 10,
+      hedge_hold_hours: 8,
+      auto_reenter: true,
+    };
   });
+
+  // Save to localStorage when config change
+  useEffect(() => {
+    localStorage.setItem('valiant_config', JSON.stringify(config));
+  }, [config]);
 
   const addLog = (msg: string) => {
     const time = new Date().toLocaleTimeString();
