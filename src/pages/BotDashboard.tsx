@@ -143,6 +143,18 @@ export default function BotDashboard() {
     };
   }, []);
 
+  // Load saved session and reconnect
+  useEffect(() => {
+    if (!backendReady || initialLoading) return;
+    
+    const savedSession = localStorage.getItem('valiant_session_id');
+    if (savedSession) {
+      addLog('Found saved session, reconnecting...');
+      setSessionId(savedSession);
+      setTimeout(() => connectWS(savedSession), 500);
+    }
+  }, [backendReady, initialLoading]);
+
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   const connectWS = (sid: string) => {
@@ -250,6 +262,7 @@ export default function BotDashboard() {
       
       if (res.ok && data.session_id) {
         setSessionId(data.session_id);
+        localStorage.setItem('valiant_session_id', data.session_id);
         setIsRunning(true);
         setLogs([]);
         setPositions([]);
@@ -268,13 +281,23 @@ export default function BotDashboard() {
   const handleStop = async () => {
     if (!sessionId) return;
     
+    setLoading(true);
+    addLog('Stopping bot and closing all positions...');
+    
     wsRef.current?.send(JSON.stringify({ action: 'stop' }));
     
     try {
       await fetch(`${API_URL}/api/stop/${sessionId}`, { method: 'POST' });
-    } catch {}
+      addLog('Bot stopped, all positions closed');
+    } catch (e: any) {
+      addLog(`Stop error: ${e.message}`);
+    }
     
+    // Clear session from storage
+    localStorage.removeItem('valiant_session_id');
+    setSessionId(null);
     setIsRunning(false);
+    setLoading(false);
   };
 
   const copySession = () => {
