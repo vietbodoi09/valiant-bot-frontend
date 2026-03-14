@@ -912,34 +912,26 @@ request.onsuccess = async (e) => {
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px] font-bold">2</span>
-                          <span>Press <kbd className="px-1.5 py-0.5 bg-white/10 rounded text-[10px]">F12</kbd> to open Developer Tools</span>
+                          <span>Press <kbd className="px-1.5 py-0.5 bg-white/10 rounded text-[10px]">F12</kbd> → <strong>Network</strong> tab</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px] font-bold">3</span>
-                          <span>Go to the <strong>Console</strong> tab</span>
+                          <span>Refresh page (F5) and wait for it to load</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px] font-bold">4</span>
-                          <span>Copy & paste the code below, then press Enter:</span>
+                          <span>Look for API calls containing "info", "account", or "user"</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px] font-bold">5</span>
+                          <span>Click the request → <strong>Response</strong> tab → find "account_id" or "accountIndex"</span>
                         </li>
                       </ol>
-                      <div className="mt-3 p-3 rounded-lg bg-black/60 border border-white/10 overflow-x-auto">
-                        <code className="text-[10px] text-green-400 font-mono whitespace-pre">{`// Method 1: From localStorage
-const userData = JSON.parse(localStorage.getItem('persist:user') || '{}');
-console.log('Account ID:', userData.accountIndex);
-
-// Method 2: From Redux store (if logged in)
-console.log('Account ID:', store.getState().user.accountIndex);
-
-// Method 3: Check all localStorage keys
-for (let key in localStorage) {
-  if (key.includes('account') || key.includes('user')) {
-    console.log(key, localStorage.getItem(key));
-  }
-}`}</code>
-                      </div>
-                      <p className="mt-2 text-[10px] text-white/50">
-                        The Account ID should be a number like <code className="text-cyan-400">719083</code>
+                      <p className="mt-3 text-[10px] text-white/50">
+                        Alternative: Check <strong>Redux DevTools</strong> (if installed) → State → user → accountIndex
+                      </p>
+                      <p className="mt-1 text-[10px] text-white/50">
+                        The Account ID is a number like <code className="text-cyan-400">719083</code>
                       </p>
                     </div>
                   </CardContent>
