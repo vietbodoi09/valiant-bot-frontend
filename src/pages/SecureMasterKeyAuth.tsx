@@ -303,6 +303,9 @@ export default function SecureMasterKeyAuth({ onAuthenticated }: SecureMasterKey
                   onKeyDown={handleKeyDown}
                   disabled={isVerifying || isLocked}
                   placeholder="Enter your master key..."
+                  autoComplete="new-password"
+                  data-lpignore="true"
+                  data-form-type="other"
                   className={cn(
                     'bg-white/5 border-white/10 text-white placeholder:text-white/30 pr-12 font-mono',
                     error && 'border-red-500/50 focus:border-red-500',
