@@ -63,9 +63,7 @@ function useWebSocketManager() {
     onStatusChange('connecting');
 
     const wsUrl = API_URL.replace('https://', 'wss://').replace('http://', 'ws://');
-    const token = localStorage.getItem('valiant_jwt_token');
-    const wsUrlWithAuth = token ? `${wsUrl}/ws/${sessionId}?token=${token}` : `${wsUrl}/ws/${sessionId}`;
-    const ws = new WebSocket(wsUrlWithAuth);
+    const ws = new WebSocket(`${wsUrl}/ws/${sessionId}`);
     ws.binaryType = 'arraybuffer';
 
     ws.onopen = () => {
@@ -435,10 +433,7 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
     addLog('Connecting to live feed...');
     
     const wsUrl = API_URL.replace('https://', 'wss://').replace('http://', 'ws://');
-    const token = localStorage.getItem('valiant_jwt_token');
-    // Try token in URL query param
-    const wsUrlWithAuth = token ? `${wsUrl}/ws/${sid}?token=${token}` : `${wsUrl}/ws/${sid}`;
-    const ws = new WebSocket(wsUrlWithAuth);
+    const ws = new WebSocket(`${wsUrl}/ws/${sid}`);
     
     ws.onopen = () => {
       setWsStatus('connected');
