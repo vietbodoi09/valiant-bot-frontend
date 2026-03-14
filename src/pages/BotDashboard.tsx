@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { 
   Play, Pause, Key, Activity, RefreshCw, 
-  TrendingUp, Server, Copy, ChevronDown, ChevronUp,
+  TrendingUp, Server, Copy,
   BarChart3, DollarSign, Shield, Zap, Loader2,
   Wallet, Clock, Target, Radio, TrendingDown,
   ArrowUpRight, ArrowDownRight, Circle, AlertCircle,
-  CheckCircle2, XCircle, Terminal, Settings2, Eye, EyeOff
+  CheckCircle2, XCircle, Terminal, Settings2, Eye, EyeOff,
+  LogOut
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
-const API_URL = 'https://valiant-bot-be-01.fly.dev';
+const API_URL = 'https://valiant-bot-be-01.fly.app';
 
 interface Position {
   symbol: string;
@@ -45,6 +46,10 @@ interface LogEntry {
   timestamp: string;
   message: string;
   type: 'info' | 'success' | 'error' | 'warning';
+}
+
+interface BotDashboardProps {
+  onLogout: () => void;
 }
 
 function useWebSocketManager() {
@@ -305,7 +310,7 @@ function LiveLog({ logs }: { logs: LogEntry[] }) {
   );
 }
 
-export default function BotDashboard() {
+export default function BotDashboard({ onLogout }: BotDashboardProps) {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [logs, setLogs] = useState<LogEntry[]>([]);
@@ -571,6 +576,15 @@ export default function BotDashboard() {
                   <TooltipContent><p>Click to copy session ID</p></TooltipContent>
                 </Tooltip>
               )}
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={onLogout}
+                className="text-white/40 hover:text-red-400 hover:bg-red-500/10"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
             </div>
           </div>
         </header>
@@ -631,7 +645,6 @@ export default function BotDashboard() {
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
-              {/* Positions */}
               {positions.length > 0 && (
                 <div>
                   <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
@@ -643,7 +656,6 @@ export default function BotDashboard() {
                 </div>
               )}
 
-              {/* Action Buttons */}
               <div className="flex flex-wrap gap-3">
                 {!isRunning ? (
                   <Button onClick={handleStart} disabled={loading || !apiKeys.valiant_agent_key || !apiKeys.lighter_api_key}
@@ -659,7 +671,6 @@ export default function BotDashboard() {
                 )}
               </div>
 
-              {/* Live Logs - Always visible */}
               <Card className="bg-black/40 backdrop-blur border-white/5">
                 <CardContent className="p-6">
                   <LiveLog logs={logs} />
