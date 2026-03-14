@@ -155,8 +155,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
       const keysUrl = `${API_URL}/api/admin/keys?admin_key=${encodeURIComponent(key)}`;
       const statsUrl = `${API_URL}/api/admin/stats?admin_key=${encodeURIComponent(key)}`;
       
-      console.log('Fetching keys from:', keysUrl);
-      
       const [keysRes, statsRes] = await Promise.all([
         fetch(keysUrl),
         fetch(statsUrl)
@@ -166,15 +164,11 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         const keysData = await keysRes.json();
         const statsData = await statsRes.json();
         
-        console.log('Keys response:', keysData);
-        console.log('Stats response:', statsData);
-        
         // Handle different response structures
         const keysArray = keysData.keys || keysData.data || (Array.isArray(keysData) ? keysData : []);
         setKeys(keysArray);
         setStats(statsData);
       } else {
-        console.error('Fetch failed:', keysRes.status, statsRes.status);
         // Invalid admin key
         setIsAdminAuthenticated(false);
         setAdminKey('');
@@ -355,9 +349,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                          (filterStatus === 'revoked' && !key.is_active);
     return matchesSearch && matchesFilter;
   });
-
-  // Debug log
-  console.log('Render - keys.length:', keys.length, 'filteredKeys.length:', filteredKeys.length, 'searchTerm:', searchTerm, 'filterStatus:', filterStatus);
 
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return 'Never';
