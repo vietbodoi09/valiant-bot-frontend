@@ -6,7 +6,7 @@ import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
 import BotDashboard from './pages/BotDashboard';
 import SecureMasterKeyAuth from './pages/SecureMasterKeyAuth';
-
+import AdminDashboard from './pages/AdminDashboard';
 
 const AUTH_API_URL = 'https://valiant-bot-be-01.fly.dev';
 
@@ -108,7 +108,8 @@ function App() {
                 } 
               />
               
-
+              {/* Admin Dashboard */}
+              <Route path="/admin" element={<AdminDashboard onLogout={handleLogout} />} />
             </Routes>
           </main>
           <Footer />
