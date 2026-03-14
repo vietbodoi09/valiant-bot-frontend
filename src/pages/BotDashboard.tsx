@@ -834,14 +834,17 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                               Account ID <Info className="w-3 h-3 text-white/40" />
                             </Label>
                           </TooltipTrigger>
-                          <TooltipContent side="top" className="max-w-xs">
-                            <p className="text-xs">How to get Account ID:</p>
-                            <ol className="text-xs mt-1 space-y-1 list-decimal list-inside">
-                              <li>Go to <a href="https://lighter.xyz/" target="_blank" rel="noopener noreferrer" className="text-orange-400 underline">lighter.xyz</a></li>
-                              <li>Open DevTools (F12) → Network tab</li>
-                              <li>Refresh page, find "info" API call</li>
-                              <li>Look for "account_index" in response</li>
+                          <TooltipContent side="top" className="max-w-xs p-3">
+                            <p className="text-xs font-semibold mb-2">How to get Account ID (Console Method):</p>
+                            <ol className="text-xs space-y-1.5 list-decimal list-inside">
+                              <li>Go to <a href="https://lighter.xyz/" target="_blank" rel="noopener noreferrer" className="text-orange-400 underline">lighter.xyz</a> and connect wallet</li>
+                              <li>Press <kbd className="px-1 py-0.5 bg-white/10 rounded text-white/80">F12</kbd> → Console tab</li>
+                              <li>Paste this code:</li>
                             </ol>
+                            <pre className="mt-2 p-2 bg-black/50 rounded text-[10px] text-green-400 font-mono overflow-x-auto">
+JSON.parse(localStorage.getItem('persist:user') || '{}').accountIndex || 'Not found'
+                            </pre>
+                            <p className="text-[10px] text-white/50 mt-2">Or check: Application → Local Storage → lighter.xyz</p>
                           </TooltipContent>
                         </Tooltip>
                         <Input type="number" value={apiKeys.lighter_account_index}
