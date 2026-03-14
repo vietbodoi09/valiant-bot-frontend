@@ -121,7 +121,7 @@ function AnimatedNumber({ value, prefix = '', suffix = '', decimals = 2, classNa
     prevValueRef.current = value;
   }, [value]);
 
-  return <span className={className}>{prefix}{displayValue.toFixed(decimals)}{suffix}</span>;
+  return <span className={className}>{prefix}{displayValue.toFixed(decimals)}{suffix ? ' ' + suffix : ''}</span>;
 }
 
 function PositionCard({ position }: { position: Position }) {
@@ -828,14 +828,31 @@ request.onsuccess = async (e) => {
                       </div>
                     </div>
                     {config.mode === 'hedge' && (
-                      <div className="space-y-2">
-                        <Label className="text-white/60 text-xs flex items-center gap-1">
-                          <Clock className="w-3 h-3" /> Hold Time (hours)
-                        </Label>
-                        <Input type="number" step={0.1} value={config.hedge_hold_hours}
-                          onChange={e => setConfig({...config, hedge_hold_hours: Number(e.target.value)})}
-                          className="bg-white/5 border-white/10 text-white" />
-                      </div>
+                      <>
+                        <div className="space-y-2">
+                          <Label className="text-white/60 text-xs flex items-center gap-1">
+                            <Clock className="w-3 h-3" /> Hold Time (hours)
+                          </Label>
+                          <Input type="number" step={0.1} value={config.hedge_hold_hours}
+                            onChange={e => setConfig({...config, hedge_hold_hours: Number(e.target.value)})}
+                            className="bg-white/5 border-white/10 text-white" />
+                        </div>
+                        {/* Number of Cycles - Only in Hedge mode */}
+                        <div className="space-y-2">
+                          <Label className="text-white/60 text-xs flex items-center gap-1">
+                            <RotateCcw className="w-3 h-3" /> Number of Cycles
+                          </Label>
+                          <Input 
+                            type="number" 
+                            min={1}
+                            value={config.cycles || 1}
+                            onChange={e => setConfig({...config, cycles: Number(e.target.value)})}
+                            className="bg-white/5 border-white/10 text-white" 
+                            placeholder="Number of cycles to run"
+                          />
+                          <p className="text-[10px] text-white/40">Bot will stop after completing this many cycles</p>
+                        </div>
+                      </>
                     )}
                     {config.mode === 'spam' && (
                       <div className="grid grid-cols-2 gap-3">
@@ -853,22 +870,6 @@ request.onsuccess = async (e) => {
                         </div>
                       </div>
                     )}
-
-                    {/* Number of Cycles - Always visible */}
-                    <div className="space-y-2">
-                      <Label className="text-white/60 text-xs flex items-center gap-1">
-                        <RotateCcw className="w-3 h-3" /> Number of Cycles
-                      </Label>
-                      <Input 
-                        type="number" 
-                        min={1}
-                        value={config.cycles || 1}
-                        onChange={e => setConfig({...config, cycles: Number(e.target.value)})}
-                        className="bg-white/5 border-white/10 text-white" 
-                        placeholder="Number of cycles to run"
-                      />
-                      <p className="text-[10px] text-white/40">Bot will stop after completing this many cycles</p>
-                    </div>
 
                     <div className="flex items-center gap-3 p-3 rounded-lg bg-white/5">
                       <input type="checkbox" id="autoReenter" checked={config.auto_reenter}
