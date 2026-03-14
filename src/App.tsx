@@ -4,6 +4,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
 import BotDashboard from './pages/BotDashboard';
+import AdminDashboard from './pages/AdminDashboard'; 
 
 function App() {
   return (
