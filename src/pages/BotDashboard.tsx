@@ -837,7 +837,7 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                           <TooltipContent side="top" className="max-w-xs">
                             <p className="text-xs">How to get Account ID:</p>
                             <ol className="text-xs mt-1 space-y-1 list-decimal list-inside">
-                              <li>Go to <a href="https://app.getlighter.com/" target="_blank" rel="noopener noreferrer" className="text-orange-400 underline">app.getlighter.com</a></li>
+                              <li>Go to <a href="https://lighter.xyz/" target="_blank" rel="noopener noreferrer" className="text-orange-400 underline">lighter.xyz</a></li>
                               <li>Open DevTools (F12) → Network tab</li>
                               <li>Refresh page, find "info" API call</li>
                               <li>Look for "account_index" in response</li>
