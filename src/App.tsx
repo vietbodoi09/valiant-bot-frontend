@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { WalletProvider } from './hooks/useWallet';
 import Header from './components/Header';
@@ -11,6 +11,7 @@ import AdminDashboard from './pages/AdminDashboard';
 const AUTH_API_URL = 'https://valiant-bot-be-01.fly.dev';
 
 function App() {
+  const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [isChecking, setIsChecking] = useState(true);
@@ -73,6 +74,7 @@ function App() {
     setAuthToken(null);
     setKeyName('');
     setIsAuthenticated(false);
+    navigate('/');  // Redirect to home after logout
   };
 
   if (isChecking) {
