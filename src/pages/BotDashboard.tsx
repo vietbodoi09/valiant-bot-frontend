@@ -35,6 +35,7 @@ export default function BotDashboard() {
   const [showKeys, setShowKeys] = useState(false);
   const [positions, setPositions] = useState<Position[]>([]);
   const [stats, setStats] = useState({ trades: 0, volume: 0, pnl: 0 });
+  const [balances, setBalances] = useState<{hyperliquid: number, lighter: number}>({hyperliquid: 0, lighter: 0});
   
   // Initial loading state - wait for backend connection
   const [initialLoading, setInitialLoading] = useState(true);
@@ -207,15 +208,25 @@ export default function BotDashboard() {
         else if (msg.type === 'state') {
           setIsRunning(msg.data.is_running);
           setStats(msg.data.stats || { trades: 0, volume: 0, pnl: 0 });
+          if (msg.data.balances) {
+            setBalances(msg.data.balances);
+          }
         }
         else if (msg.type === 'position') {
           const pos = msg.data.position;
+          const exchange = msg.data.exchange;
           if (pos) {
             setPositions(prev => {
-              const filtered = prev.filter(p => p.exchange !== msg.data.exchange);
-              return [...filtered, { ...pos, exchange: msg.data.exchange }];
+              const filtered = prev.filter(p => p.exchange !== exchange);
+              return [...filtered, { ...pos, exchange }];
             });
+          } else {
+            // Position closed - remove from list
+            setPositions(prev => prev.filter(p => p.exchange !== exchange));
           }
+        }
+        else if (msg.type === 'balances') {
+          setBalances(msg.data);
         }
         else if (msg.type === 'ping') {
           ws.send(JSON.stringify({ type: 'pong' }));
@@ -681,6 +692,35 @@ export default function BotDashboard() {
 
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Balances */}
+            {isRunning && (balances.hyperliquid > 0 || balances.lighter > 0) && (
+              <Card className="bg-black/40 backdrop-blur border-white/5">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-white flex items-center gap-2 text-base">
+                    <DollarSign className="w-4 h-4 text-orange-400" /> Exchange Balances
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 rounded-lg bg-white/5 border border-white/10">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-6 h-6 rounded bg-blue-500/20 flex items-center justify-center text-xs font-bold text-blue-400">HL</div>
+                        <span className="text-white/60 text-sm">Hyperliquid</span>
+                      </div>
+                      <div className="text-white text-xl font-semibold">${balances.hyperliquid.toFixed(2)}</div>
+                    </div>
+                    <div className="p-4 rounded-lg bg-white/5 border border-white/10">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-6 h-6 rounded bg-purple-500/20 flex items-center justify-center text-xs font-bold text-purple-400">LT</div>
+                        <span className="text-white/60 text-sm">Lighter</span>
+                      </div>
+                      <div className="text-white text-xl font-semibold">${balances.lighter.toFixed(2)}</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Positions */}
             {positions?.length > 0 && (
               <Card className="bg-black/40 backdrop-blur border-white/5">
