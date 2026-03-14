@@ -78,10 +78,10 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'revoked'>('all');
   const [expandedKey, setExpandedKey] = useState<string | null>(null);
   
-  // Admin auth state - kept in memory only, not localStorage
+  // Admin auth state
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [adminKeyInput, setAdminKeyInput] = useState('');
-  const [adminKey, setAdminKey] = useState(''); // Stored in memory only
+  const [adminKey, setAdminKey] = useState('');
   const [loginError, setLoginError] = useState('');
   const [isLocked, setIsLocked] = useState(false);
   const [lockTimeLeft, setLockTimeLeft] = useState(0);
@@ -90,7 +90,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   
   const hasCheckedLock = useRef(false);
 
-  // Check lock status on mount
+  // Check lock status and auto-login on mount
   useEffect(() => {
     if (hasCheckedLock.current) return;
     hasCheckedLock.current = true;
@@ -116,11 +116,19 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         setAttempts(parseInt(savedAttempts));
       }
       
-      setLoading(false);
+      // Auto-login if saved admin key exists
+      const savedAdminKey = localStorage.getItem('valiant_admin_key');
+      if (savedAdminKey && !lockUntil) {
+        setAdminKey(savedAdminKey);
+        await fetchData(savedAdminKey);
+        setIsAdminAuthenticated(true);
+      } else {
+        setLoading(false);
+      }
     };
     
     checkLock();
-  }, []);
+  }, [fetchData]);
 
   // Lock countdown
   useEffect(() => {
@@ -191,7 +199,8 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
       const response = await fetch(`${API_URL}/api/admin/verify?admin_key=${encodeURIComponent(adminKeyInput)}`);
       
       if (response.ok) {
-        // Success - store in memory only, not localStorage
+        // Success - save to localStorage for auto-login
+        localStorage.setItem('valiant_admin_key', adminKeyInput);
         setAdminKey(adminKeyInput);
         setIsAdminAuthenticated(true);
         setAttempts(0);
@@ -324,6 +333,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   };
 
   const handleAdminLogout = () => {
+    localStorage.removeItem('valiant_admin_key');
     setAdminKey('');
     setIsAdminAuthenticated(false);
     setKeys([]);
@@ -363,9 +373,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   if (!isAdminAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#0d0d0d] to-[#0a0a0a] flex items-center justify-center p-4">
-        {/* Hidden fake inputs to trick browser password managers */}
-        <input type="text" name="username" style={{ display: 'none' }} tabIndex={-1} aria-hidden="true" />
-        <input type="password" name="password" style={{ display: 'none' }} tabIndex={-1} aria-hidden="true" />
+
         
         <div className="relative z-10 w-full max-w-md">
           <div className="text-center mb-8">
@@ -409,26 +417,14 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                   Admin Key
                 </Label>
                 <Input
-                  type="text"
-                  inputMode="text"
-                  autoComplete="off"
-                  autoCorrect="off"
-                  autoCapitalize="off"
-                  spellCheck="false"
-                  data-lpignore="true"
-                  data-form-type="other"
-                  aria-autocomplete="none"
+                  type="password"
+                  autoComplete="current-password"
                   value={adminKeyInput}
                   onChange={(e) => setAdminKeyInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && !isLocked && handleAdminLogin()}
-                  onFocus={(e) => {
-                    e.target.setAttribute('readonly', 'readonly');
-                    setTimeout(() => e.target.removeAttribute('readonly'), 50);
-                  }}
                   disabled={isLocked || loading}
                   placeholder="Enter admin key..."
                   className="bg-white/5 border-white/10 text-white font-mono"
-                  style={{ WebkitTextSecurity: 'disc' }}
                 />
               </div>
 
@@ -462,7 +458,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 </div>
                 <div className="flex items-center gap-2 text-white/40 text-xs">
                   <CheckCircle className="w-3.5 h-3.5 text-green-400" />
-                  <span>Memory-only key storage (no localStorage)</span>
+                  <span>Auto-fill enabled for convenience</span>
                 </div>
               </div>
             </CardContent>

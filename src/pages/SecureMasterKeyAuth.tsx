@@ -289,10 +289,6 @@ export default function SecureMasterKeyAuth({ onAuthenticated }: SecureMasterKey
               <span>Device: {deviceId || 'Generating...'}</span>
             </div>
 
-            {/* Hidden input to catch auto-fill */}
-            <input type="text" name="username" style={{position: 'absolute', opacity: 0, pointerEvents: 'none'}} tabIndex={-1} />
-            <input type="password" name="password" style={{position: 'absolute', opacity: 0, pointerEvents: 'none'}} tabIndex={-1} />
-            
             {/* Input */}
             <div className="space-y-2">
               <Label className="text-white/60 text-sm flex items-center gap-2">
@@ -302,25 +298,9 @@ export default function SecureMasterKeyAuth({ onAuthenticated }: SecureMasterKey
               <div className="relative">
                 <Input
                   id="master-key-input"
-                  name="master-key-field"
-                  type="text"
-                  inputMode="text"
-                  autoComplete="off"
-                  autoCorrect="off"
-                  autoCapitalize="off"
-                  spellCheck="false"
-                  data-lpignore="true"
-                  data-form-type="other"
-                  aria-autocomplete="none"
-                  onFocus={(e) => {
-                    // Clear after browser auto-fill completes
-                    e.target.setAttribute('readonly', 'readonly');
-                    setTimeout(() => {
-                      e.target.removeAttribute('readonly');
-                      setMasterKey('');
-                    }, 50);
-                  }}
-                  onBeforeInput={() => setMasterKey('')}
+                  name="master-key"
+                  type="password"
+                  autoComplete="current-password"
                   value={masterKey}
                   onChange={(e) => setMasterKey(e.target.value)}
                   onKeyDown={handleKeyDown}
@@ -331,9 +311,6 @@ export default function SecureMasterKeyAuth({ onAuthenticated }: SecureMasterKey
                     error && 'border-red-500/50 focus:border-red-500',
                     isLocked && 'opacity-50 cursor-not-allowed'
                   )}
-                  style={{
-                    WebkitTextSecurity: showKey ? 'none' : 'disc',
-                  }}
                 />
                 <button
                   type="button"
@@ -451,7 +428,7 @@ export default function SecureMasterKeyAuth({ onAuthenticated }: SecureMasterKey
                   <p className="mb-2">Follow these steps to extract your Agent Key from Valiant:</p>
                   
                   <ol className="space-y-3 list-decimal list-inside">
-                    <li>Open <strong>Valiant Dashboard</strong> in your browser</li>
+                    <li>Open <a href="https://valiant.trade/perps" target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:underline"><strong>Valiant Dashboard</strong></a> in your browser</li>
                     <li>Press <kbd className="px-2 py-0.5 bg-white/10 rounded text-white/80">F12</kbd> to open Developer Tools</li>
                     <li>Go to the <strong>Console</strong> tab</li>
                     <li>Copy and paste the code below, then press Enter:</li>
