@@ -62,8 +62,12 @@ function useWebSocketManager() {
     isConnectingRef.current = true;
     onStatusChange('connecting');
 
+    // Get auth token from localStorage for WebSocket auth
+    const token = localStorage.getItem('valiant_jwt_token');
     const wsUrl = API_URL.replace('https://', 'wss://').replace('http://', 'ws://');
-    const ws = new WebSocket(`${wsUrl}/ws/${sessionId}`);
+    // Add token to WebSocket URL for authentication
+    const wsUrlWithAuth = token ? `${wsUrl}/ws/${sessionId}?token=${encodeURIComponent(token)}` : `${wsUrl}/ws/${sessionId}`;
+    const ws = new WebSocket(wsUrlWithAuth);
     ws.binaryType = 'arraybuffer';
 
     ws.onopen = () => {
@@ -346,9 +350,9 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
 
   const parseLogType = (message: string): 'info' | 'success' | 'error' | 'warning' => {
     const lower = message.toLowerCase();
-    if (lower.includes('error') || lower.includes('failed') || lower.includes('G¥î')) return 'error';
-    if (lower.includes('success') || lower.includes('G£à') || lower.includes('filled')) return 'success';
-    if (lower.includes('warning') || lower.includes('GÜán+Å') || lower.includes('caution')) return 'warning';
+    if (lower.includes('error') || lower.includes('failed') || lower.includes('Gï¿½ï¿½')) return 'error';
+    if (lower.includes('success') || lower.includes('Gï¿½ï¿½') || lower.includes('filled')) return 'success';
+    if (lower.includes('warning') || lower.includes('Gï¿½ï¿½n+ï¿½') || lower.includes('caution')) return 'warning';
     return 'info';
   };
 
@@ -429,8 +433,12 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
     setWsStatus('connecting');
     addLog('Connecting to live feed...');
     
+    // Get auth token from localStorage for WebSocket auth
+    const token = localStorage.getItem('valiant_jwt_token');
     const wsUrl = API_URL.replace('https://', 'wss://').replace('http://', 'ws://');
-    const ws = new WebSocket(`${wsUrl}/ws/${sid}`);
+    // Add token to WebSocket URL for authentication
+    const wsUrlWithAuth = token ? `${wsUrl}/ws/${sid}?token=${encodeURIComponent(token)}` : `${wsUrl}/ws/${sid}`;
+    const ws = new WebSocket(wsUrlWithAuth);
     
     ws.onopen = () => {
       setWsStatus('connected');
