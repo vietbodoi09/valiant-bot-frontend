@@ -305,14 +305,22 @@ export default function SecureMasterKeyAuth({ onAuthenticated }: SecureMasterKey
                   name="master-key-field"
                   type="text"
                   inputMode="text"
-                  autoComplete="one-time-code"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck="false"
                   data-lpignore="true"
                   data-form-type="other"
-                  onFocus={() => {
+                  aria-autocomplete="none"
+                  onFocus={(e) => {
                     // Clear after browser auto-fill completes
-                    setTimeout(() => setMasterKey(''), 50);
+                    e.target.setAttribute('readonly', 'readonly');
+                    setTimeout(() => {
+                      e.target.removeAttribute('readonly');
+                      setMasterKey('');
+                    }, 50);
                   }}
-                  onClick={() => setMasterKey('')}
+                  onBeforeInput={() => setMasterKey('')}
                   value={masterKey}
                   onChange={(e) => setMasterKey(e.target.value)}
                   onKeyDown={handleKeyDown}
@@ -323,6 +331,9 @@ export default function SecureMasterKeyAuth({ onAuthenticated }: SecureMasterKey
                     error && 'border-red-500/50 focus:border-red-500',
                     isLocked && 'opacity-50 cursor-not-allowed'
                   )}
+                  style={{
+                    WebkitTextSecurity: showKey ? 'none' : 'disc',
+                  }}
                 />
                 <button
                   type="button"
