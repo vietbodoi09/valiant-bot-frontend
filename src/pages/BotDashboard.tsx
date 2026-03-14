@@ -360,6 +360,11 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
     const type = parseLogType(message);
     const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     setLogs(prev => { const newLogs = [...prev, { id, timestamp, message, type }]; return newLogs.slice(-500); });
+    
+    // Auto-detect bot stopped from logs
+    if (message.includes('Bot STOPPED') || message.includes('Hedge mode completed')) {
+      setIsRunning(false);
+    }
   }, []);
 
   const handleWebSocketMessage = useCallback((msg: any) => {
@@ -464,6 +469,13 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
           const logs = Array.isArray(msg.data) ? msg.data : [msg.data];
           logBatch.push(...logs);
           flushLogs(); // Update immediately for real-time feel
+          
+          // Auto-detect bot stopped from logs
+          logs.forEach((log: string) => {
+            if (log.includes('Bot STOPPED') || log.includes('Hedge mode completed')) {
+              setIsRunning(false);
+            }
+          });
         }
         else if (msg.type === 'state') {
           setIsRunning(msg.data.is_running);
