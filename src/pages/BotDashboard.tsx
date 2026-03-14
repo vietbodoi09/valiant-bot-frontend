@@ -6,7 +6,7 @@ import {
   Wallet, Clock, Target, Radio, TrendingDown,
   ArrowUpRight, ArrowDownRight, Circle, AlertCircle,
   CheckCircle2, XCircle, Terminal, Settings2, Eye, EyeOff,
-  LogOut
+  LogOut, Info, ExternalLink, RotateCcw
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -46,10 +46,6 @@ interface LogEntry {
   timestamp: string;
   message: string;
   type: 'info' | 'success' | 'error' | 'warning';
-}
-
-interface BotDashboardProps {
-  onLogout: () => void;
 }
 
 function useWebSocketManager() {
@@ -310,7 +306,13 @@ function LiveLog({ logs }: { logs: LogEntry[] }) {
   );
 }
 
-export default function BotDashboard({ onLogout }: BotDashboardProps) {
+interface BotDashboardProps {
+  onLogout: () => void;
+  authToken?: string | null;
+  keyName?: string;
+}
+
+export default function BotDashboard({ onLogout, authToken: _authToken, keyName: _keyName }: BotDashboardProps) {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [logs, setLogs] = useState<LogEntry[]>([]);
@@ -336,7 +338,7 @@ export default function BotDashboard({ onLogout }: BotDashboardProps) {
   const [config, setConfig] = useState(() => {
     const saved = localStorage.getItem('valiant_config');
     if (saved) { try { return JSON.parse(saved); } catch (e) {} }
-    return { mode: 'hedge', symbol: 'BTC', size_usd: 150, leverage: 10, hedge_hold_hours: 8, auto_reenter: true, spam_rounds: 10, spam_interval: 10 };
+    return { mode: 'hedge', symbol: 'BTC', size_usd: 150, leverage: 10, hedge_hold_hours: 8, auto_reenter: true, spam_rounds: 10, spam_interval: 10, cycles: 1 };
   });
 
   useEffect(() => { localStorage.setItem('valiant_api_keys', JSON.stringify(apiKeys)); }, [apiKeys]);
@@ -576,15 +578,19 @@ export default function BotDashboard({ onLogout }: BotDashboardProps) {
                   <TooltipContent><p>Click to copy session ID</p></TooltipContent>
                 </Tooltip>
               )}
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={onLogout}
-                className="text-white/40 hover:text-red-400 hover:bg-red-500/10"
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                Logout
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={onLogout}
+                    className="text-white/40 hover:text-red-400 hover:bg-red-500/10"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent><p>Logout</p></TooltipContent>
+              </Tooltip>
             </div>
           </div>
         </header>
@@ -645,6 +651,7 @@ export default function BotDashboard({ onLogout }: BotDashboardProps) {
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
+              {/* Positions */}
               {positions.length > 0 && (
                 <div>
                   <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
@@ -656,6 +663,7 @@ export default function BotDashboard({ onLogout }: BotDashboardProps) {
                 </div>
               )}
 
+              {/* Action Buttons */}
               <div className="flex flex-wrap gap-3">
                 {!isRunning ? (
                   <Button onClick={handleStart} disabled={loading || !apiKeys.valiant_agent_key || !apiKeys.lighter_api_key}
@@ -671,6 +679,7 @@ export default function BotDashboard({ onLogout }: BotDashboardProps) {
                 )}
               </div>
 
+              {/* Live Logs - Always visible */}
               <Card className="bg-black/40 backdrop-blur border-white/5">
                 <CardContent className="p-6">
                   <LiveLog logs={logs} />
@@ -726,6 +735,38 @@ export default function BotDashboard({ onLogout }: BotDashboardProps) {
                         <Input type="number" value={apiKeys.lighter_api_key_index}
                           onChange={e => setApiKeys({...apiKeys, lighter_api_key_index: e.target.value})}
                           className="bg-white/5 border-white/10 text-white" placeholder="2-254" />
+                      </div>
+                    </div>
+
+                    {/* Valiant Agent Key Guide - Always Visible */}
+                    <div className="mt-4 p-4 rounded-xl bg-gradient-to-br from-orange-500/10 to-amber-500/10 border border-orange-500/20">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Info className="w-4 h-4 text-orange-400" />
+                        <h4 className="text-orange-300 font-medium text-sm">How to Get Your Valiant Agent Key</h4>
+                      </div>
+                      <ol className="space-y-2 text-xs text-white/70">
+                        <li className="flex items-start gap-2">
+                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-[10px] font-bold">1</span>
+                          <span>Go to <a href="https://app.valiant.fund/" target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:text-orange-300 underline inline-flex items-center gap-1">app.valiant.fund <ExternalLink className="w-3 h-3" /></a> and connect your wallet</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-[10px] font-bold">2</span>
+                          <span>Click on your wallet address in the top right corner</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-[10px] font-bold">3</span>
+                          <span>Select "Copy Agent Key" from the dropdown menu</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-[10px] font-bold">4</span>
+                          <span>Paste the key into the "Valiant Agent Key" field above</span>
+                        </li>
+                      </ol>
+                      <div className="mt-3 pt-3 border-t border-orange-500/20">
+                        <p className="text-[10px] text-white/50 flex items-center gap-1">
+                          <Shield className="w-3 h-3" />
+                          Your keys are stored locally in your browser and never sent to our servers.
+                        </p>
                       </div>
                     </div>
                   </CardContent>
@@ -799,6 +840,23 @@ export default function BotDashboard({ onLogout }: BotDashboardProps) {
                         </div>
                       </div>
                     )}
+
+                    {/* Number of Cycles - Always visible */}
+                    <div className="space-y-2">
+                      <Label className="text-white/60 text-xs flex items-center gap-1">
+                        <RotateCcw className="w-3 h-3" /> Number of Cycles
+                      </Label>
+                      <Input 
+                        type="number" 
+                        min={1}
+                        value={config.cycles || 1}
+                        onChange={e => setConfig({...config, cycles: Number(e.target.value)})}
+                        className="bg-white/5 border-white/10 text-white" 
+                        placeholder="Number of cycles to run"
+                      />
+                      <p className="text-[10px] text-white/40">Bot will stop after completing this many cycles</p>
+                    </div>
+
                     <div className="flex items-center gap-3 p-3 rounded-lg bg-white/5">
                       <input type="checkbox" id="autoReenter" checked={config.auto_reenter}
                         onChange={e => setConfig({...config, auto_reenter: e.target.checked})}
