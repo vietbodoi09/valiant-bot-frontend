@@ -542,58 +542,45 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
           <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-orange-600/5 rounded-full blur-[100px]" />
         </div>
 
-        <header className="relative border-b border-white/5 bg-black/40 backdrop-blur-xl sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="absolute inset-0 bg-orange-500/30 blur-lg rounded-xl" />
-                <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg">
-                  <Zap className="w-5 h-5 text-white" />
-                </div>
-              </div>
-              <div>
-                <h1 className="text-lg font-bold text-white">Valiant Bot</h1>
-                <p className="text-xs text-white/40">Delta-Neutral Arbitrage</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Badge variant={wsStatus === 'connected' ? 'default' : 'secondary'} 
-                className={cn('px-3 py-1',
-                  wsStatus === 'connected' && 'bg-green-500/20 text-green-400 border-green-500/30',
-                  wsStatus === 'connecting' && 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-                  wsStatus === 'disconnected' && 'bg-gray-500/20 text-gray-400')}>
-                <span className={cn('w-2 h-2 rounded-full mr-2', 
-                  wsStatus === 'connected' ? 'bg-green-400 animate-pulse' : 
-                  wsStatus === 'connecting' ? 'bg-yellow-400 animate-pulse' : 'bg-gray-400')} />
-                {wsStatus === 'connected' ? 'Live' : wsStatus === 'connecting' ? 'Connecting' : 'Offline'}
-              </Badge>
-              {sessionId && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Badge variant="outline" onClick={copySession}
-                      className="border-white/10 text-white/60 font-mono text-xs cursor-pointer hover:border-orange-500/50 transition-colors">
-                      {sessionId} <Copy className="w-3 h-3 ml-2" />
-                    </Badge>
-                  </TooltipTrigger>
-                  <TooltipContent><p>Click to copy session ID</p></TooltipContent>
-                </Tooltip>
-              )}
+        {/* Status Bar - Only status/session/logout, no duplicate title */}
+        <div className="relative border-b border-white/5 bg-black/40 backdrop-blur-xl">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-12 flex items-center justify-end gap-3">
+            <Badge variant={wsStatus === 'connected' ? 'default' : 'secondary'} 
+              className={cn('px-3 py-1',
+                wsStatus === 'connected' && 'bg-green-500/20 text-green-400 border-green-500/30',
+                wsStatus === 'connecting' && 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+                wsStatus === 'disconnected' && 'bg-gray-500/20 text-gray-400')}>
+              <span className={cn('w-2 h-2 rounded-full mr-2', 
+                wsStatus === 'connected' ? 'bg-green-400 animate-pulse' : 
+                wsStatus === 'connecting' ? 'bg-yellow-400 animate-pulse' : 'bg-gray-400')} />
+              {wsStatus === 'connected' ? 'Live' : wsStatus === 'connecting' ? 'Connecting' : 'Offline'}
+            </Badge>
+            {sessionId && (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={onLogout}
-                    className="text-white/40 hover:text-red-400 hover:bg-red-500/10"
-                  >
-                    <LogOut className="w-4 h-4" />
-                  </Button>
+                  <Badge variant="outline" onClick={copySession}
+                    className="border-white/10 text-white/60 font-mono text-xs cursor-pointer hover:border-orange-500/50 transition-colors">
+                    {sessionId} <Copy className="w-3 h-3 ml-2" />
+                  </Badge>
                 </TooltipTrigger>
-                <TooltipContent><p>Logout</p></TooltipContent>
+                <TooltipContent><p>Click to copy session ID</p></TooltipContent>
               </Tooltip>
-            </div>
+            )}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={onLogout}
+                  className="text-white/40 hover:text-red-400 hover:bg-red-500/10"
+                >
+                  <LogOut className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent><p>Logout</p></TooltipContent>
+            </Tooltip>
           </div>
-        </header>
+        </div>
 
         <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -751,17 +738,43 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="flex-shrink-0 w-5 h-5 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-[10px] font-bold">2</span>
-                          <span>Click on your wallet address in the top right corner</span>
+                          <span>Press <kbd className="px-1.5 py-0.5 bg-white/10 rounded text-[10px]">F12</kbd> to open Developer Tools</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="flex-shrink-0 w-5 h-5 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-[10px] font-bold">3</span>
-                          <span>Select "Copy Agent Key" from the dropdown menu</span>
+                          <span>Go to the <strong>Console</strong> tab</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="flex-shrink-0 w-5 h-5 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-[10px] font-bold">4</span>
-                          <span>Paste the key into the "Valiant Agent Key" field above</span>
+                          <span>Copy & paste the code below, then press Enter:</span>
                         </li>
                       </ol>
+                      <div className="mt-3 p-3 rounded-lg bg-black/60 border border-white/10 overflow-x-auto">
+                        <code className="text-[10px] text-green-400 font-mono whitespace-pre">{`const request = indexedDB.open('valiant-agent-keys');
+request.onsuccess = async (e) => {
+  const db = e.target.result;
+  const tx = db.transaction('encryption-keys', 'readonly');
+  const store = tx.objectStore('encryption-keys');
+  const walletAddress = 'YOUR_WALLET_ADDRESS';
+  const getKey = store.get(walletAddress);
+  getKey.onsuccess = async () => {
+    const cryptoKey = getKey.result;
+    const encryptedB64 = localStorage.getItem('valiant:agent:' + walletAddress);
+    const encryptedBytes = Uint8Array.from(atob(encryptedB64), c => c.charCodeAt(0));
+    const iv = encryptedBytes.slice(0, 12);
+    const ciphertext = encryptedBytes.slice(12);
+    try {
+      const decrypted = await crypto.subtle.decrypt(
+        { name: 'AES-GCM', iv: iv }, cryptoKey, ciphertext
+      );
+      console.log('KEY:', new TextDecoder().decode(decrypted));
+    } catch(err) { console.log('Error:', err); }
+  };
+};`}</code>
+                      </div>
+                      <p className="mt-2 text-[10px] text-white/50">
+                        Replace <code className="text-orange-400">YOUR_WALLET_ADDRESS</code> with your actual wallet address
+                      </p>
                       <div className="mt-3 pt-3 border-t border-orange-500/20">
                         <p className="text-[10px] text-white/50 flex items-center gap-1">
                           <Shield className="w-3 h-3" />
