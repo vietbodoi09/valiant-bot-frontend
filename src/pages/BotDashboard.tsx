@@ -628,12 +628,10 @@ export default function BotDashboard() {
               <TabsTrigger value="config" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">
                 <Settings2 className="w-4 h-4 mr-2" /> Configuration
               </TabsTrigger>
-              <TabsTrigger value="logs" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">
-                <Terminal className="w-4 h-4 mr-2" /> Logs
-              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
+              {/* Positions */}
               {positions.length > 0 && (
                 <div>
                   <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
@@ -644,6 +642,8 @@ export default function BotDashboard() {
                   </div>
                 </div>
               )}
+
+              {/* Action Buttons */}
               <div className="flex flex-wrap gap-3">
                 {!isRunning ? (
                   <Button onClick={handleStart} disabled={loading || !apiKeys.valiant_agent_key || !apiKeys.lighter_api_key}
@@ -658,6 +658,13 @@ export default function BotDashboard() {
                   </Button>
                 )}
               </div>
+
+              {/* Live Logs - Always visible */}
+              <Card className="bg-black/40 backdrop-blur border-white/5">
+                <CardContent className="p-6">
+                  <LiveLog logs={logs} />
+                </CardContent>
+              </Card>
             </TabsContent>
 
             <TabsContent value="config" className="space-y-6">
@@ -805,14 +812,6 @@ export default function BotDashboard() {
                   </CardContent>
                 </Card>
               </div>
-            </TabsContent>
-
-            <TabsContent value="logs">
-              <Card className="bg-black/40 backdrop-blur border-white/5">
-                <CardContent className="p-6">
-                  <LiveLog logs={logs} />
-                </CardContent>
-              </Card>
             </TabsContent>
           </Tabs>
         </main>
