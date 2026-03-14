@@ -63,17 +63,14 @@ function useWebSocketManager() {
     onStatusChange('connecting');
 
     const wsUrl = API_URL.replace('https://', 'wss://').replace('http://', 'ws://');
-    const ws = new WebSocket(`${wsUrl}/ws/${sessionId}`);
+    const token = localStorage.getItem('valiant_jwt_token');
+    const wsUrlWithAuth = token ? `${wsUrl}/ws/${sessionId}?token=${token}` : `${wsUrl}/ws/${sessionId}`;
+    const ws = new WebSocket(wsUrlWithAuth);
     ws.binaryType = 'arraybuffer';
 
     ws.onopen = () => {
       isConnectingRef.current = false;
       onStatusChange('connected');
-      // Send auth token as first message
-      const token = localStorage.getItem('valiant_jwt_token');
-      if (token) {
-        ws.send(JSON.stringify({ type: 'auth', token }));
-      }
       while (messageQueueRef.current.length > 0) {
         ws.send(JSON.stringify(messageQueueRef.current.shift()));
       }
@@ -435,14 +432,12 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
     addLog('Connecting to live feed...');
     
     const wsUrl = API_URL.replace('https://', 'wss://').replace('http://', 'ws://');
-    const ws = new WebSocket(`${wsUrl}/ws/${sid}`);
+    const token = localStorage.getItem('valiant_jwt_token');
+    // Try token in URL query param
+    const wsUrlWithAuth = token ? `${wsUrl}/ws/${sid}?token=${token}` : `${wsUrl}/ws/${sid}`;
+    const ws = new WebSocket(wsUrlWithAuth);
     
-    // Send auth message immediately after connection
     ws.onopen = () => {
-      const token = localStorage.getItem('valiant_jwt_token');
-      if (token) {
-        ws.send(JSON.stringify({ type: 'auth', token }));
-      }
       setWsStatus('connected');
       addLog('Live feed connected');
     };
@@ -835,7 +830,7 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                       <ol className="space-y-2 text-xs text-white/70">
                         <li className="flex items-start gap-2">
                           <span className="flex-shrink-0 w-5 h-5 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-[10px] font-bold">1</span>
-                          <span>Go to <a href="https://app.valiant.fund/" target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:text-orange-300 underline inline-flex items-center gap-1">app.valiant.fund <ExternalLink className="w-3 h-3" /></a> and connect your wallet</span>
+                          <span>Go to <a href="https://valiant.trade/perps" target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:text-orange-300 underline inline-flex items-center gap-1">valiant.trade/perps <ExternalLink className="w-3 h-3" /></a> and connect your wallet</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="flex-shrink-0 w-5 h-5 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-[10px] font-bold">2</span>
