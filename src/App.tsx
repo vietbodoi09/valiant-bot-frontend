@@ -1,30 +1,45 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { WalletProvider } from './hooks/useWallet';
-import Header from './components/Header';
-import Footer from './components/Footer';
+import { useState, useEffect } from 'react';
 import HomePage from './pages/HomePage';
 import BotDashboard from './pages/BotDashboard';
-import AdminDashboard from './pages/AdminDashboard'; 
-import MasterKeyAuth from './pages/MasterKeyAuth';
+import SecureMasterKeyAuth from './pages/SecureMasterKeyAuth';
+import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
+  const [isAuth, setIsAuth] = useState(false);
+
+  useEffect(() => {
+    // Check existing token
+    const token = localStorage.getItem('valiant_jwt_token');
+    const expiry = localStorage.getItem('valiant_token_expiry');
+    if (token && expiry && new Date(expiry) > new Date()) {
+      setIsAuth(true);
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('valiant_jwt_token');
+    localStorage.removeItem('valiant_token_expiry');
+    setIsAuth(false);
+  };
+
   return (
-    <WalletProvider>
-      <Router>
-        <div className="min-h-screen bg-[#0a0a0a] text-white">
-          <Header />
-          <main>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/bot" element={<BotDashboard />} />
-              <Route path="/bot" element={<MasterKeyAuth />} />
-              <Route path="/admin" element={<AdminDashboard />} />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
-      </Router>
-    </WalletProvider>
+    <Router>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route 
+          path="/bot" 
+          element={
+            isAuth ? (
+              <BotDashboard onLogout={handleLogout} />
+            ) : (
+              <SecureMasterKeyAuth onAuthenticated={() => setIsAuth(true)} />
+            )
+          } 
+        />
+        <Route path="/admin" element={<AdminDashboard onLogout={handleLogout} />} />
+      </Routes>
+    </Router>
   );
 }
 
