@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 
-const API_URL = 'https://valiant-bot-be-01.fly.dev';
+const API_URL = 'https://valiant-bot-be-01.fly.app';
 
 interface MasterKey {
   id: string;
@@ -38,11 +38,88 @@ interface AuthStats {
   failed_attempts_24h: number;
 }
 
-interface AdminDashboardProps {
-  onLogout: () => void;
+// Admin Login Component
+function AdminLogin({ onLogin }: { onLogin: (key: string) => void }) {
+  const [adminKey, setAdminKey] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adminKey.trim()) return;
+    
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch(`${API_URL}/api/admin/verify?admin_key=${adminKey}`);
+      if (response.ok) {
+        localStorage.setItem('valiant_admin_key', adminKey);
+        onLogin(adminKey);
+      } else {
+        setError('Invalid admin key');
+      }
+    } catch (e) {
+      setError('Network error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#0d0d0d] to-[#0a0a0a] flex items-center justify-center p-4">
+      <div className="relative z-10 w-full max-w-md">
+        <div className="text-center mb-8">
+          <div className="relative w-20 h-20 mx-auto mb-4">
+            <div className="absolute inset-0 bg-red-500/30 blur-xl rounded-2xl" />
+            <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-2xl">
+              <Shield className="w-10 h-10 text-white" />
+            </div>
+          </div>
+          <h1 className="text-3xl font-bold text-white mb-2">Admin Access</h1>
+          <p className="text-white/50">Master Key Management</p>
+        </div>
+
+        <Card className="bg-black/60 backdrop-blur-xl border-white/10">
+          <CardContent className="p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-white/60">Admin Key</Label>
+                <Input
+                  type="password"
+                  value={adminKey}
+                  onChange={(e) => setAdminKey(e.target.value)}
+                  placeholder="Enter admin key..."
+                  className="bg-white/5 border-white/10 text-white"
+                />
+              </div>
+              
+              {error && (
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+                  <AlertCircle className="w-4 h-4" />
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <Button
+                type="submit"
+                disabled={loading || !adminKey.trim()}
+                className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-400 hover:to-red-500"
+              >
+                {loading ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Lock className="w-4 h-4 mr-2" />}
+                Access Admin Panel
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
 }
 
-export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
+export default function AdminDashboard() {
+  const [adminKey, setAdminKey] = useState<string>('');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [keys, setKeys] = useState<MasterKey[]>([]);
   const [stats, setStats] = useState<AuthStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -55,19 +132,50 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'revoked'>('all');
   const [expandedKey, setExpandedKey] = useState<string | null>(null);
-  const [adminKey, setAdminKey] = useState('');
 
+  // Check for saved admin key on mount
   useEffect(() => {
-    const savedAdminKey = localStorage.getItem('valiant_admin_key');
-    if (savedAdminKey) {
-      setAdminKey(savedAdminKey);
-      fetchData(savedAdminKey);
+    const savedKey = localStorage.getItem('valiant_admin_key');
+    if (savedKey) {
+      verifySavedKey(savedKey);
     } else {
       setLoading(false);
     }
   }, []);
 
+  const verifySavedKey = async (key: string) => {
+    try {
+      const response = await fetch(`${API_URL}/api/admin/verify?admin_key=${key}`);
+      if (response.ok) {
+        setAdminKey(key);
+        setIsAuthenticated(true);
+        fetchData(key);
+      } else {
+        localStorage.removeItem('valiant_admin_key');
+        setLoading(false);
+      }
+    } catch (e) {
+      localStorage.removeItem('valiant_admin_key');
+      setLoading(false);
+    }
+  };
+
+  const handleLogin = (key: string) => {
+    setAdminKey(key);
+    setIsAuthenticated(true);
+    fetchData(key);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('valiant_admin_key');
+    setAdminKey('');
+    setIsAuthenticated(false);
+    setKeys([]);
+    setStats(null);
+  };
+
   const fetchData = async (key: string) => {
+    setLoading(true);
     try {
       const [keysRes, statsRes] = await Promise.all([
         fetch(`${API_URL}/api/admin/keys?admin_key=${key}`),
@@ -80,8 +188,8 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         setKeys(keysData.keys);
         setStats(statsData);
       } else {
-        localStorage.removeItem('valiant_admin_key');
-        setAdminKey('');
+        // Invalid key
+        handleLogout();
       }
     } catch (e) {
       console.error('Failed to fetch data:', e);
@@ -90,26 +198,9 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     }
   };
 
-  const handleAdminLogin = async () => {
-    if (!adminKey.trim()) return;
-    setLoading(true);
-    try {
-      const response = await fetch(`${API_URL}/api/admin/verify?admin_key=${adminKey}`);
-      if (response.ok) {
-        localStorage.setItem('valiant_admin_key', adminKey);
-        await fetchData(adminKey);
-      } else {
-        alert('Invalid admin key');
-      }
-    } catch (e) {
-      alert('Network error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const createKey = async () => {
     if (!newKeyName.trim()) return;
+
     try {
       const response = await fetch(`${API_URL}/api/admin/keys`, {
         method: 'POST',
@@ -125,7 +216,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
       if (response.ok) {
         const data = await response.json();
         setGeneratedKey(data.key);
-        await fetchData(adminKey);
+        fetchData(adminKey);
       }
     } catch (e) {
       console.error('Failed to create key:', e);
@@ -134,13 +225,17 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
   const revokeKey = async (keyId: string) => {
     if (!confirm('Are you sure you want to revoke this key?')) return;
+
     try {
       const response = await fetch(`${API_URL}/api/admin/keys/${keyId}/revoke`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ admin_key: adminKey })
       });
-      if (response.ok) await fetchData(adminKey);
+
+      if (response.ok) {
+        fetchData(adminKey);
+      }
     } catch (e) {
       console.error('Failed to revoke key:', e);
     }
@@ -153,19 +248,26 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ admin_key: adminKey })
       });
-      if (response.ok) await fetchData(adminKey);
+
+      if (response.ok) {
+        fetchData(adminKey);
+      }
     } catch (e) {
       console.error('Failed to reactivate key:', e);
     }
   };
 
   const deleteKey = async (keyId: string) => {
-    if (!confirm('Permanently delete this key?')) return;
+    if (!confirm('Permanently delete this key? This cannot be undone.')) return;
+
     try {
       const response = await fetch(`${API_URL}/api/admin/keys/${keyId}?admin_key=${adminKey}`, {
         method: 'DELETE'
       });
-      if (response.ok) await fetchData(adminKey);
+
+      if (response.ok) {
+        fetchData(adminKey);
+      }
     } catch (e) {
       console.error('Failed to delete key:', e);
     }
@@ -196,51 +298,14 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     return new Date(expiresAt) < new Date();
   };
 
-  if (!adminKey) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#0d0d0d] to-[#0a0a0a] flex items-center justify-center p-4">
-        <div className="relative z-10 w-full max-w-md">
-          <div className="text-center mb-8">
-            <div className="relative w-20 h-20 mx-auto mb-4">
-              <div className="absolute inset-0 bg-red-500/30 blur-xl rounded-2xl" />
-              <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-2xl">
-                <Shield className="w-10 h-10 text-white" />
-              </div>
-            </div>
-            <h1 className="text-3xl font-bold text-white mb-2">Admin Access</h1>
-            <p className="text-white/50">Master Key Management</p>
-          </div>
-
-          <Card className="bg-black/60 backdrop-blur-xl border-white/10">
-            <CardContent className="p-6 space-y-4">
-              <div className="space-y-2">
-                <Label className="text-white/60">Admin Key</Label>
-                <Input
-                  type="password"
-                  value={adminKey}
-                  onChange={(e) => setAdminKey(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleAdminLogin()}
-                  placeholder="Enter admin key..."
-                  className="bg-white/5 border-white/10 text-white"
-                />
-              </div>
-              <Button
-                onClick={handleAdminLogin}
-                disabled={loading}
-                className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-400 hover:to-red-500"
-              >
-                {loading ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Lock className="w-4 h-4 mr-2" />}
-                Access Admin Panel
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
+  // Show login if not authenticated
+  if (!isAuthenticated) {
+    return <AdminLogin onLogin={handleLogin} />;
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#0d0d0d] to-[#0a0a0a]">
+      {/* Header */}
       <header className="border-b border-white/5 bg-black/40 backdrop-blur-xl sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -256,7 +321,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={onLogout} className="text-white/40 hover:text-white">
+            <Button variant="ghost" size="sm" onClick={handleLogout} className="text-white/40 hover:text-white">
               <LogOut className="w-4 h-4 mr-2" />
               Logout
             </Button>
@@ -265,6 +330,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Stats */}
         {stats && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <Card className="bg-black/40 border-white/5">
@@ -306,6 +372,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
           </div>
         )}
 
+        {/* Actions Bar */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
             <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
@@ -424,6 +491,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
           </div>
         </div>
 
+        {/* Keys List */}
         <Card className="bg-black/40 border-white/5">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
