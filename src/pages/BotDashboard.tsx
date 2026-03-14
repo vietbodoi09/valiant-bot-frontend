@@ -171,7 +171,8 @@ export default function BotDashboard() {
     setWsStatus('connecting');
     addLog('Connecting to live feed...');
     
-    const ws = new WebSocket(`wss://valiant-bot-backend.onrender.com/ws/${sid}`);
+    const wsUrl = API_URL.replace('https://', 'wss://').replace('http://', 'ws://');
+    const ws = new WebSocket(`${wsUrl}/ws/${sid}`);
     
     ws.onopen = () => {
       setWsStatus('connected');
