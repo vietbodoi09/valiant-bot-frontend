@@ -828,7 +828,22 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-2">
-                        <Label className="text-white/60 text-xs">Account ID</Label>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Label className="text-white/60 text-xs cursor-help flex items-center gap-1">
+                              Account ID <Info className="w-3 h-3 text-white/40" />
+                            </Label>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-xs">
+                            <p className="text-xs">How to get Account ID:</p>
+                            <ol className="text-xs mt-1 space-y-1 list-decimal list-inside">
+                              <li>Go to <a href="https://app.getlighter.com/" target="_blank" rel="noopener noreferrer" className="text-orange-400 underline">app.getlighter.com</a></li>
+                              <li>Open DevTools (F12) → Network tab</li>
+                              <li>Refresh page, find "info" API call</li>
+                              <li>Look for "account_index" in response</li>
+                            </ol>
+                          </TooltipContent>
+                        </Tooltip>
                         <Input type="number" value={apiKeys.lighter_account_index}
                           onChange={e => setApiKeys({...apiKeys, lighter_account_index: e.target.value})}
                           className="bg-white/5 border-white/10 text-white" placeholder="e.g., 719083" />
