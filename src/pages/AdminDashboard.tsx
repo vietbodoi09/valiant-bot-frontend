@@ -140,21 +140,13 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     return () => clearInterval(timer);
   }, [isLocked, lockTimeLeft]);
 
-  // Fetch data - admin_key in POST body, not URL
+  // Fetch data - admin_key in URL (backend requires GET)
   const fetchData = useCallback(async (key: string) => {
     try {
       setLoading(true);
       const [keysRes, statsRes] = await Promise.all([
-        fetch(`${API_URL}/api/admin/keys`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ admin_key: key })
-        }),
-        fetch(`${API_URL}/api/admin/stats`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ admin_key: key })
-        })
+        fetch(`${API_URL}/api/admin/keys?admin_key=${encodeURIComponent(key)}`),
+        fetch(`${API_URL}/api/admin/stats?admin_key=${encodeURIComponent(key)}`)
       ]);
 
       if (keysRes.ok && statsRes.ok) {
@@ -175,7 +167,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     }
   }, []);
 
-  // Admin login with brute force protection
+  // Admin login with brute force protection - backend requires GET
   const handleAdminLogin = async () => {
     if (isLocked || !adminKeyInput.trim()) return;
     
@@ -183,14 +175,8 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     setLoading(true);
     
     try {
-      const response = await fetch(`${API_URL}/api/admin/verify`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          admin_key: adminKeyInput,
-          device_fingerprint: deviceId
-        })
-      });
+      // Backend uses GET with query param
+      const response = await fetch(`${API_URL}/api/admin/verify?admin_key=${encodeURIComponent(adminKeyInput)}`);
       
       if (response.ok) {
         // Success - store in memory only, not localStorage
@@ -222,7 +208,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     }
   };
 
-  // Create key - admin_key in body
+  // Create key - admin_key in body (POST is standard for create)
   const createKey = async () => {
     if (!newKeyName.trim() || !adminKey) return;
 
@@ -242,6 +228,11 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         const data = await response.json();
         setGeneratedKey(data.key);
         await fetchData(adminKey);
+      } else if (response.status === 401 || response.status === 403) {
+        setIsAdminAuthenticated(false);
+        setAdminKey('');
+        setLoginError('Session expired. Please login again.');
+        setShowCreateDialog(false);
       }
     } catch (e) {
       console.error('Failed to create key:', e);
@@ -261,6 +252,10 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
       if (response.ok) {
         await fetchData(adminKey);
+      } else if (response.status === 401 || response.status === 403) {
+        setIsAdminAuthenticated(false);
+        setAdminKey('');
+        setLoginError('Session expired. Please login again.');
       }
     } catch (e) {
       console.error('Failed to revoke key:', e);
@@ -279,25 +274,31 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
       if (response.ok) {
         await fetchData(adminKey);
+      } else if (response.status === 401 || response.status === 403) {
+        setIsAdminAuthenticated(false);
+        setAdminKey('');
+        setLoginError('Session expired. Please login again.');
       }
     } catch (e) {
       console.error('Failed to reactivate key:', e);
     }
   };
 
-  // Delete key - admin_key in body
+  // Delete key - admin_key in URL (backend uses DELETE)
   const deleteKey = async (keyId: string) => {
     if (!confirm('Permanently delete this key? This cannot be undone.') || !adminKey) return;
 
     try {
-      const response = await fetch(`${API_URL}/api/admin/keys/${keyId}/delete`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ admin_key: adminKey })
+      const response = await fetch(`${API_URL}/api/admin/keys/${keyId}?admin_key=${encodeURIComponent(adminKey)}`, {
+        method: 'DELETE'
       });
 
       if (response.ok) {
         await fetchData(adminKey);
+      } else if (response.status === 401 || response.status === 403) {
+        setIsAdminAuthenticated(false);
+        setAdminKey('');
+        setLoginError('Session expired. Please login again.');
       }
     } catch (e) {
       console.error('Failed to delete key:', e);
@@ -440,10 +441,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
               </Button>
 
               <div className="pt-4 border-t border-white/5 space-y-2">
-                <div className="flex items-center gap-2 text-white/40 text-xs">
-                  <CheckCircle className="w-3.5 h-3.5 text-green-400" />
-                  <span>Secure POST request (key not in URL)</span>
-                </div>
                 <div className="flex items-center gap-2 text-white/40 text-xs">
                   <CheckCircle className="w-3.5 h-3.5 text-green-400" />
                   <span>Brute force protection (5 attempts)</span>
