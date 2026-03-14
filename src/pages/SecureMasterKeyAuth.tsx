@@ -308,7 +308,11 @@ export default function SecureMasterKeyAuth({ onAuthenticated }: SecureMasterKey
                   autoComplete="one-time-code"
                   data-lpignore="true"
                   data-form-type="other"
-                  onFocus={() => setMasterKey('')}
+                  onFocus={() => {
+                    // Clear after browser auto-fill completes
+                    setTimeout(() => setMasterKey(''), 50);
+                  }}
+                  onClick={() => setMasterKey('')}
                   value={masterKey}
                   onChange={(e) => setMasterKey(e.target.value)}
                   onKeyDown={handleKeyDown}
