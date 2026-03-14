@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   Shield, Key, Plus, Trash2, Copy, Check, RefreshCw, 
   Users, Ban, CheckCircle, AlertCircle,
   ChevronDown, ChevronUp, Search, LogOut,
-  Lock, Unlock
+  Lock, Unlock, ShieldAlert
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -43,6 +43,27 @@ interface AdminDashboardProps {
   onLogout: () => void;
 }
 
+// Generate device fingerprint for admin
+const generateDeviceFingerprint = async (): Promise<string> => {
+  const components = [
+    navigator.userAgent,
+    navigator.language,
+    navigator.platform,
+    screen.width + 'x' + screen.height,
+    screen.colorDepth.toString(),
+    new Date().getTimezoneOffset().toString(),
+    navigator.hardwareConcurrency?.toString() || '',
+    (navigator as any).deviceMemory?.toString() || '',
+  ];
+  
+  const data = components.join('|');
+  const encoder = new TextEncoder();
+  const buffer = await crypto.subtle.digest('SHA-256', encoder.encode(data));
+  return Array.from(new Uint8Array(buffer))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+};
+
 export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [keys, setKeys] = useState<MasterKey[]>([]);
   const [stats, setStats] = useState<AuthStats | null>(null);
@@ -56,28 +77,84 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'revoked'>('all');
   const [expandedKey, setExpandedKey] = useState<string | null>(null);
-  const [adminKey, setAdminKey] = useState('');
+  
+  // Admin auth state - kept in memory only, not localStorage
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  const [adminKeyInput, setAdminKeyInput] = useState('');
+  const [adminKey, setAdminKey] = useState(''); // Stored in memory only
+  const [loginError, setLoginError] = useState('');
+  const [isLocked, setIsLocked] = useState(false);
+  const [lockTimeLeft, setLockTimeLeft] = useState(0);
+  const [attempts, setAttempts] = useState(0);
+  const [deviceId, setDeviceId] = useState('');
+  
+  const hasCheckedLock = useRef(false);
 
-  // Load keys and stats (only once on mount)
-  const hasFetchedRef = useRef(false);
+  // Check lock status on mount
   useEffect(() => {
-    if (hasFetchedRef.current) return;
-    hasFetchedRef.current = true;
+    if (hasCheckedLock.current) return;
+    hasCheckedLock.current = true;
     
-    const savedAdminKey = localStorage.getItem('valiant_admin_key');
-    if (savedAdminKey) {
-      setAdminKey(savedAdminKey);
-      fetchData(savedAdminKey);
-    } else {
+    const checkLock = async () => {
+      const fingerprint = await generateDeviceFingerprint();
+      setDeviceId(fingerprint.slice(0, 16));
+      
+      const lockUntil = localStorage.getItem('valiant_admin_lock_until');
+      if (lockUntil) {
+        const lockTime = parseInt(lockUntil);
+        if (Date.now() < lockTime) {
+          setIsLocked(true);
+          setLockTimeLeft(Math.ceil((lockTime - Date.now()) / 1000));
+        } else {
+          localStorage.removeItem('valiant_admin_lock_until');
+          localStorage.removeItem('valiant_admin_attempts');
+        }
+      }
+      
+      const savedAttempts = localStorage.getItem('valiant_admin_attempts');
+      if (savedAttempts) {
+        setAttempts(parseInt(savedAttempts));
+      }
+      
       setLoading(false);
-    }
+    };
+    
+    checkLock();
   }, []);
 
-  const fetchData = async (key: string) => {
+  // Lock countdown
+  useEffect(() => {
+    if (!isLocked || lockTimeLeft <= 0) return;
+    
+    const timer = setInterval(() => {
+      setLockTimeLeft(prev => {
+        if (prev <= 1) {
+          setIsLocked(false);
+          localStorage.removeItem('valiant_admin_lock_until');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isLocked, lockTimeLeft]);
+
+  // Fetch data - admin_key in POST body, not URL
+  const fetchData = useCallback(async (key: string) => {
     try {
+      setLoading(true);
       const [keysRes, statsRes] = await Promise.all([
-        fetch(`${API_URL}/api/admin/keys?admin_key=${key}`),
-        fetch(`${API_URL}/api/admin/stats?admin_key=${key}`)
+        fetch(`${API_URL}/api/admin/keys`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ admin_key: key })
+        }),
+        fetch(`${API_URL}/api/admin/stats`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ admin_key: key })
+        })
       ]);
 
       if (keysRes.ok && statsRes.ok) {
@@ -87,37 +164,67 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         setStats(statsData);
       } else {
         // Invalid admin key
-        localStorage.removeItem('valiant_admin_key');
+        setIsAdminAuthenticated(false);
         setAdminKey('');
+        setLoginError('Session expired. Please login again.');
       }
     } catch (e) {
       console.error('Failed to fetch data:', e);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
+  // Admin login with brute force protection
   const handleAdminLogin = async () => {
-    if (!adminKey.trim()) return;
+    if (isLocked || !adminKeyInput.trim()) return;
     
+    setLoginError('');
     setLoading(true);
+    
     try {
-      const response = await fetch(`${API_URL}/api/admin/verify?admin_key=${adminKey}`);
+      const response = await fetch(`${API_URL}/api/admin/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          admin_key: adminKeyInput,
+          device_fingerprint: deviceId
+        })
+      });
+      
       if (response.ok) {
-        localStorage.setItem('valiant_admin_key', adminKey);
-        await fetchData(adminKey);
+        // Success - store in memory only, not localStorage
+        setAdminKey(adminKeyInput);
+        setIsAdminAuthenticated(true);
+        setAttempts(0);
+        localStorage.removeItem('valiant_admin_attempts');
+        await fetchData(adminKeyInput);
       } else {
-        alert('Invalid admin key');
+        // Failed
+        const newAttempts = attempts + 1;
+        setAttempts(newAttempts);
+        localStorage.setItem('valiant_admin_attempts', newAttempts.toString());
+        
+        if (response.status === 429 || newAttempts >= 5) {
+          const lockUntil = Date.now() + 5 * 60 * 1000;
+          localStorage.setItem('valiant_admin_lock_until', lockUntil.toString());
+          setIsLocked(true);
+          setLockTimeLeft(5 * 60);
+          setLoginError('Too many failed attempts. Locked for 5 minutes.');
+        } else {
+          setLoginError(`Invalid admin key. ${5 - newAttempts} attempts remaining.`);
+        }
       }
     } catch (e) {
-      alert('Network error');
+      setLoginError('Network error. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
+  // Create key - admin_key in body
   const createKey = async () => {
-    if (!newKeyName.trim()) return;
+    if (!newKeyName.trim() || !adminKey) return;
 
     try {
       const response = await fetch(`${API_URL}/api/admin/keys`, {
@@ -141,8 +248,9 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     }
   };
 
+  // Revoke key - admin_key in body
   const revokeKey = async (keyId: string) => {
-    if (!confirm('Are you sure you want to revoke this key?')) return;
+    if (!confirm('Are you sure you want to revoke this key?') || !adminKey) return;
 
     try {
       const response = await fetch(`${API_URL}/api/admin/keys/${keyId}/revoke`, {
@@ -159,7 +267,9 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     }
   };
 
+  // Reactivate key - admin_key in body
   const reactivateKey = async (keyId: string) => {
+    if (!adminKey) return;
     try {
       const response = await fetch(`${API_URL}/api/admin/keys/${keyId}/reactivate`, {
         method: 'POST',
@@ -175,12 +285,15 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     }
   };
 
+  // Delete key - admin_key in body
   const deleteKey = async (keyId: string) => {
-    if (!confirm('Permanently delete this key? This cannot be undone.')) return;
+    if (!confirm('Permanently delete this key? This cannot be undone.') || !adminKey) return;
 
     try {
-      const response = await fetch(`${API_URL}/api/admin/keys/${keyId}?admin_key=${adminKey}`, {
-        method: 'DELETE'
+      const response = await fetch(`${API_URL}/api/admin/keys/${keyId}/delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ admin_key: adminKey })
       });
 
       if (response.ok) {
@@ -195,6 +308,20 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     navigator.clipboard.writeText(text);
     setCopiedKey(true);
     setTimeout(() => setCopiedKey(false), 2000);
+  };
+
+  const handleAdminLogout = () => {
+    setAdminKey('');
+    setIsAdminAuthenticated(false);
+    setKeys([]);
+    setStats(null);
+    onLogout();
+  };
+
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   const filteredKeys = keys.filter(key => {
@@ -217,9 +344,13 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   };
 
   // Admin Login Screen
-  if (!adminKey) {
+  if (!isAdminAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#0d0d0d] to-[#0a0a0a] flex items-center justify-center p-4">
+        {/* Hidden fake inputs to trick browser password managers */}
+        <input type="text" name="username" style={{ display: 'none' }} tabIndex={-1} aria-hidden="true" />
+        <input type="password" name="password" style={{ display: 'none' }} tabIndex={-1} aria-hidden="true" />
+        
         <div className="relative z-10 w-full max-w-md">
           <div className="text-center mb-8">
             <div className="relative w-20 h-20 mx-auto mb-4">
@@ -234,25 +365,94 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
           <Card className="bg-black/60 backdrop-blur-xl border-white/10">
             <CardContent className="p-6 space-y-4">
+              {/* Device Info */}
+              <div className="flex items-center justify-center gap-2 text-white/40 text-xs mb-4">
+                <Shield className="w-3.5 h-3.5" />
+                <span>Device: {deviceId || 'Generating...'}</span>
+              </div>
+
+              {isLocked && (
+                <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-center">
+                  <div className="text-red-400 font-semibold mb-1 flex items-center justify-center gap-2">
+                    <ShieldAlert className="w-4 h-4" />
+                    Account Locked
+                  </div>
+                  <div className="text-white/60 text-sm">Try again in {formatTime(lockTimeLeft)}</div>
+                  <div className="mt-2 h-1 bg-white/10 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-red-500 rounded-full transition-all duration-1000"
+                      style={{ width: `${(lockTimeLeft / (5 * 60)) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-2">
-                <Label className="text-white/60">Admin Key</Label>
+                <Label className="text-white/60 flex items-center gap-2">
+                  <Key className="w-4 h-4" />
+                  Admin Key
+                </Label>
                 <Input
-                  type="password"
-                  value={adminKey}
-                  onChange={(e) => setAdminKey(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleAdminLogin()}
+                  type="text"
+                  inputMode="text"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck="false"
+                  data-lpignore="true"
+                  data-form-type="other"
+                  aria-autocomplete="none"
+                  value={adminKeyInput}
+                  onChange={(e) => setAdminKeyInput(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && !isLocked && handleAdminLogin()}
+                  onFocus={(e) => {
+                    e.target.setAttribute('readonly', 'readonly');
+                    setTimeout(() => e.target.removeAttribute('readonly'), 50);
+                  }}
+                  disabled={isLocked || loading}
                   placeholder="Enter admin key..."
-                  className="bg-white/5 border-white/10 text-white"
+                  className="bg-white/5 border-white/10 text-white font-mono"
+                  style={{ WebkitTextSecurity: 'disc' }}
                 />
               </div>
+
+              {loginError && (
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>{loginError}</span>
+                </div>
+              )}
+
+              {!isLocked && attempts > 0 && attempts < 5 && (
+                <div className="flex items-center gap-2 text-yellow-400 text-xs">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  <span>{5 - attempts} attempts remaining before lock</span>
+                </div>
+              )}
+
               <Button
                 onClick={handleAdminLogin}
-                disabled={loading}
+                disabled={!adminKeyInput.trim() || loading || isLocked}
                 className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-400 hover:to-red-500"
               >
                 {loading ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Lock className="w-4 h-4 mr-2" />}
                 Access Admin Panel
               </Button>
+
+              <div className="pt-4 border-t border-white/5 space-y-2">
+                <div className="flex items-center gap-2 text-white/40 text-xs">
+                  <CheckCircle className="w-3.5 h-3.5 text-green-400" />
+                  <span>Secure POST request (key not in URL)</span>
+                </div>
+                <div className="flex items-center gap-2 text-white/40 text-xs">
+                  <CheckCircle className="w-3.5 h-3.5 text-green-400" />
+                  <span>Brute force protection (5 attempts)</span>
+                </div>
+                <div className="flex items-center gap-2 text-white/40 text-xs">
+                  <CheckCircle className="w-3.5 h-3.5 text-green-400" />
+                  <span>Memory-only key storage (no localStorage)</span>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -260,6 +460,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     );
   }
 
+  // Main Admin Dashboard
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#0d0d0d] to-[#0a0a0a]">
       {/* Header */}
@@ -278,7 +479,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={onLogout} className="text-white/40 hover:text-white">
+            <Button variant="ghost" size="sm" onClick={handleAdminLogout} className="text-white/40 hover:text-white">
               <LogOut className="w-4 h-4 mr-2" />
               Logout
             </Button>
@@ -407,7 +608,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                       </div>
                       <p className="text-yellow-400/80 text-xs mt-2">
                         <AlertCircle className="w-3.5 h-3.5 inline mr-1" />
-                        Copy this key now! It won't be shown again.
+                        Copy this key now! It won&apos;t be shown again.
                       </p>
                     </div>
                     <Button 
