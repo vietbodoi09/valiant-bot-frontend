@@ -62,17 +62,18 @@ function useWebSocketManager() {
     isConnectingRef.current = true;
     onStatusChange('connecting');
 
-    // Get auth token from localStorage for WebSocket auth
-    const token = localStorage.getItem('valiant_jwt_token');
     const wsUrl = API_URL.replace('https://', 'wss://').replace('http://', 'ws://');
-    // Add token to WebSocket URL for authentication
-    const wsUrlWithAuth = token ? `${wsUrl}/ws/${sessionId}?token=${encodeURIComponent(token)}` : `${wsUrl}/ws/${sessionId}`;
-    const ws = new WebSocket(wsUrlWithAuth);
+    const ws = new WebSocket(`${wsUrl}/ws/${sessionId}`);
     ws.binaryType = 'arraybuffer';
 
     ws.onopen = () => {
       isConnectingRef.current = false;
       onStatusChange('connected');
+      // Send auth token as first message
+      const token = localStorage.getItem('valiant_jwt_token');
+      if (token) {
+        ws.send(JSON.stringify({ type: 'auth', token }));
+      }
       while (messageQueueRef.current.length > 0) {
         ws.send(JSON.stringify(messageQueueRef.current.shift()));
       }
@@ -433,14 +434,15 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
     setWsStatus('connecting');
     addLog('Connecting to live feed...');
     
-    // Get auth token from localStorage for WebSocket auth
-    const token = localStorage.getItem('valiant_jwt_token');
     const wsUrl = API_URL.replace('https://', 'wss://').replace('http://', 'ws://');
-    // Add token to WebSocket URL for authentication
-    const wsUrlWithAuth = token ? `${wsUrl}/ws/${sid}?token=${encodeURIComponent(token)}` : `${wsUrl}/ws/${sid}`;
-    const ws = new WebSocket(wsUrlWithAuth);
+    const ws = new WebSocket(`${wsUrl}/ws/${sid}`);
     
+    // Send auth message immediately after connection
     ws.onopen = () => {
+      const token = localStorage.getItem('valiant_jwt_token');
+      if (token) {
+        ws.send(JSON.stringify({ type: 'auth', token }));
+      }
       setWsStatus('connected');
       addLog('Live feed connected');
     };
