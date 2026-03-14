@@ -5,6 +5,7 @@ import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
 import BotDashboard from './pages/BotDashboard';
 import AdminDashboard from './pages/AdminDashboard'; 
+import MasterKeyAuth from './pages/MasterKeyAuth';
 
 function App() {
   return (
@@ -16,6 +17,8 @@ function App() {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/bot" element={<BotDashboard />} />
+              <Route path="/bot" element={<MasterKeyAuth />} />
+              <Route path="/admin" element={<AdminDashboard />} />
             </Routes>
           </main>
           <Footer />
