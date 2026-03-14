@@ -19,7 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
-const API_URL = 'https://valiant-bot-be-01.fly.app';
+const API_URL = 'https://valiant-bot-be-01.fly.dev';
 
 interface Position {
   symbol: string;
