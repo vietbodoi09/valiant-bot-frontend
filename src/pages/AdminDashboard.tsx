@@ -90,64 +90,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   
   const hasCheckedLock = useRef(false);
 
-  // Check lock status and auto-login on mount
-  useEffect(() => {
-    if (hasCheckedLock.current) return;
-    hasCheckedLock.current = true;
-    
-    const checkLock = async () => {
-      const fingerprint = await generateDeviceFingerprint();
-      setDeviceId(fingerprint.slice(0, 16));
-      
-      const lockUntil = localStorage.getItem('valiant_admin_lock_until');
-      if (lockUntil) {
-        const lockTime = parseInt(lockUntil);
-        if (Date.now() < lockTime) {
-          setIsLocked(true);
-          setLockTimeLeft(Math.ceil((lockTime - Date.now()) / 1000));
-        } else {
-          localStorage.removeItem('valiant_admin_lock_until');
-          localStorage.removeItem('valiant_admin_attempts');
-        }
-      }
-      
-      const savedAttempts = localStorage.getItem('valiant_admin_attempts');
-      if (savedAttempts) {
-        setAttempts(parseInt(savedAttempts));
-      }
-      
-      // Auto-login if saved admin key exists
-      const savedAdminKey = localStorage.getItem('valiant_admin_key');
-      if (savedAdminKey && !lockUntil) {
-        setAdminKey(savedAdminKey);
-        await fetchData(savedAdminKey);
-        setIsAdminAuthenticated(true);
-      } else {
-        setLoading(false);
-      }
-    };
-    
-    checkLock();
-  }, [fetchData]);
-
-  // Lock countdown
-  useEffect(() => {
-    if (!isLocked || lockTimeLeft <= 0) return;
-    
-    const timer = setInterval(() => {
-      setLockTimeLeft(prev => {
-        if (prev <= 1) {
-          setIsLocked(false);
-          localStorage.removeItem('valiant_admin_lock_until');
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [isLocked, lockTimeLeft]);
-
   // Fetch data - admin_key in URL (backend requires GET)
   const fetchData = useCallback(async (key: string) => {
     try {
@@ -334,6 +276,64 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     setStats(null);
     onLogout();
   };
+
+  // Check lock status and auto-login on mount
+  useEffect(() => {
+    if (hasCheckedLock.current) return;
+    hasCheckedLock.current = true;
+    
+    const checkLock = async () => {
+      const fingerprint = await generateDeviceFingerprint();
+      setDeviceId(fingerprint.slice(0, 16));
+      
+      const lockUntil = localStorage.getItem('valiant_admin_lock_until');
+      if (lockUntil) {
+        const lockTime = parseInt(lockUntil);
+        if (Date.now() < lockTime) {
+          setIsLocked(true);
+          setLockTimeLeft(Math.ceil((lockTime - Date.now()) / 1000));
+        } else {
+          localStorage.removeItem('valiant_admin_lock_until');
+          localStorage.removeItem('valiant_admin_attempts');
+        }
+      }
+      
+      const savedAttempts = localStorage.getItem('valiant_admin_attempts');
+      if (savedAttempts) {
+        setAttempts(parseInt(savedAttempts));
+      }
+      
+      // Auto-login if saved admin key exists
+      const savedAdminKey = localStorage.getItem('valiant_admin_key');
+      if (savedAdminKey && !lockUntil) {
+        setAdminKey(savedAdminKey);
+        await fetchData(savedAdminKey);
+        setIsAdminAuthenticated(true);
+      } else {
+        setLoading(false);
+      }
+    };
+    
+    checkLock();
+  }, [fetchData]);
+
+  // Lock countdown
+  useEffect(() => {
+    if (!isLocked || lockTimeLeft <= 0) return;
+    
+    const timer = setInterval(() => {
+      setLockTimeLeft(prev => {
+        if (prev <= 1) {
+          setIsLocked(false);
+          localStorage.removeItem('valiant_admin_lock_until');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isLocked, lockTimeLeft]);
 
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
