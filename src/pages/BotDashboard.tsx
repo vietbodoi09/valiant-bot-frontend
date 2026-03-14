@@ -828,25 +828,7 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-2">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Label className="text-white/60 text-xs cursor-help flex items-center gap-1">
-                              Account ID <Info className="w-3 h-3 text-white/40" />
-                            </Label>
-                          </TooltipTrigger>
-                          <TooltipContent side="top" className="max-w-xs p-3">
-                            <p className="text-xs font-semibold mb-2">How to get Account ID (Console Method):</p>
-                            <ol className="text-xs space-y-1.5 list-decimal list-inside">
-                              <li>Go to <a href="https://lighter.xyz/" target="_blank" rel="noopener noreferrer" className="text-orange-400 underline">lighter.xyz</a> and connect wallet</li>
-                              <li>Press <kbd className="px-1 py-0.5 bg-white/10 rounded text-white/80">F12</kbd> → Console tab</li>
-                              <li>Paste this code:</li>
-                            </ol>
-                            <pre className="mt-2 p-2 bg-black/50 rounded text-[10px] text-green-400 font-mono overflow-x-auto">
-JSON.parse(localStorage.getItem('persist:user') || '{}').accountIndex || 'Not found'
-                            </pre>
-                            <p className="text-[10px] text-white/50 mt-2">Or check: Application → Local Storage → lighter.xyz</p>
-                          </TooltipContent>
-                        </Tooltip>
+                        <Label className="text-white/60 text-xs">Account ID</Label>
                         <Input type="number" value={apiKeys.lighter_account_index}
                           onChange={e => setApiKeys({...apiKeys, lighter_account_index: e.target.value})}
                           className="bg-white/5 border-white/10 text-white" placeholder="e.g., 719083" />
@@ -915,6 +897,50 @@ request.onsuccess = async (e) => {
                           Your keys are stored locally in your browser and never sent to our servers.
                         </p>
                       </div>
+                    </div>
+
+                    {/* Lighter Account ID Guide */}
+                    <div className="mt-4 p-4 rounded-xl bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-500/20">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Info className="w-4 h-4 text-cyan-400" />
+                        <h4 className="text-cyan-300 font-medium text-sm">How to Get Your Lighter Account ID</h4>
+                      </div>
+                      <ol className="space-y-2 text-xs text-white/70">
+                        <li className="flex items-start gap-2">
+                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px] font-bold">1</span>
+                          <span>Go to <a href="https://lighter.xyz/" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:text-cyan-300 underline inline-flex items-center gap-1">lighter.xyz <ExternalLink className="w-3 h-3" /></a> and connect your wallet</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px] font-bold">2</span>
+                          <span>Press <kbd className="px-1.5 py-0.5 bg-white/10 rounded text-[10px]">F12</kbd> to open Developer Tools</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px] font-bold">3</span>
+                          <span>Go to the <strong>Console</strong> tab</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px] font-bold">4</span>
+                          <span>Copy & paste the code below, then press Enter:</span>
+                        </li>
+                      </ol>
+                      <div className="mt-3 p-3 rounded-lg bg-black/60 border border-white/10 overflow-x-auto">
+                        <code className="text-[10px] text-green-400 font-mono whitespace-pre">{`// Method 1: From localStorage
+const userData = JSON.parse(localStorage.getItem('persist:user') || '{}');
+console.log('Account ID:', userData.accountIndex);
+
+// Method 2: From Redux store (if logged in)
+console.log('Account ID:', store.getState().user.accountIndex);
+
+// Method 3: Check all localStorage keys
+for (let key in localStorage) {
+  if (key.includes('account') || key.includes('user')) {
+    console.log(key, localStorage.getItem(key));
+  }
+}`}</code>
+                      </div>
+                      <p className="mt-2 text-[10px] text-white/50">
+                        The Account ID should be a number like <code className="text-cyan-400">719083</code>
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
