@@ -289,6 +289,10 @@ export default function SecureMasterKeyAuth({ onAuthenticated }: SecureMasterKey
               <span>Device: {deviceId || 'Generating...'}</span>
             </div>
 
+            {/* Hidden input to catch auto-fill */}
+            <input type="text" name="username" style={{position: 'absolute', opacity: 0, pointerEvents: 'none'}} tabIndex={-1} />
+            <input type="password" name="password" style={{position: 'absolute', opacity: 0, pointerEvents: 'none'}} tabIndex={-1} />
+            
             {/* Input */}
             <div className="space-y-2">
               <Label className="text-white/60 text-sm flex items-center gap-2">
@@ -297,24 +301,18 @@ export default function SecureMasterKeyAuth({ onAuthenticated }: SecureMasterKey
               </Label>
               <div className="relative">
                 <Input
-                  type={showKey ? 'text' : 'password'}
+                  id="master-key-input"
+                  name="master-key-field"
+                  type="text"
+                  inputMode="text"
+                  autoComplete="one-time-code"
+                  data-lpignore="true"
+                  data-form-type="other"
                   value={masterKey}
                   onChange={(e) => setMasterKey(e.target.value)}
                   onKeyDown={handleKeyDown}
                   disabled={isVerifying || isLocked}
                   placeholder="Enter your master key..."
-                  autoComplete="off"
-                  data-lpignore="true"
-                  data-form-type="other"
-                  readOnly
-                  onFocus={(e) => {
-                    e.target.removeAttribute('readOnly');
-                    e.target.select();
-                  }}
-                  onClick={(e) => {
-                    e.currentTarget.removeAttribute('readOnly');
-                    setMasterKey(''); // Clear auto-fill on click
-                  }}
                   className={cn(
                     'bg-white/5 border-white/10 text-white placeholder:text-white/30 pr-12 font-mono',
                     error && 'border-red-500/50 focus:border-red-500',
