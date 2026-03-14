@@ -761,7 +761,8 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                     {loading ? 'Starting...' : 'Start Bot'}
                   </Button>
                 ) : (
-                  <Button onClick={handleStop} variant="destructive" disabled={isStopping} className="px-8 py-6 text-lg rounded-xl">
+                  <Button onClick={handleStop} disabled={isStopping} 
+                    className="px-8 py-6 text-lg rounded-xl bg-gradient-to-r from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 text-white font-semibold shadow-lg shadow-red-500/20">
                     {isStopping ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Pause className="w-5 h-5 mr-2" />}
                     {isStopping ? 'Stopping...' : 'Stop Bot'}
                   </Button>
@@ -989,7 +990,8 @@ request.onsuccess = async (e) => {
                         {loading ? 'Starting...' : 'Start Bot'}
                       </Button>
                     ) : (
-                      <Button onClick={handleStop} variant="destructive" disabled={isStopping} className="w-full py-6 rounded-xl">
+                      <Button onClick={handleStop} disabled={isStopping} 
+                        className="w-full py-6 rounded-xl bg-gradient-to-r from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 text-white font-semibold shadow-lg shadow-red-500/20">
                         {isStopping ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Pause className="w-5 h-5 mr-2" />}
                         {isStopping ? 'Stopping...' : 'Stop Bot'}
                       </Button>
