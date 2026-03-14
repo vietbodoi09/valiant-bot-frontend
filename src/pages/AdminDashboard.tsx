@@ -339,12 +339,15 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
   const filteredKeys = keys.filter(key => {
     const matchesSearch = key.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         key.key.toLowerCase().includes(searchTerm.toLowerCase());
+                         (key.key && key.key.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesFilter = filterStatus === 'all' || 
                          (filterStatus === 'active' && key.is_active) ||
                          (filterStatus === 'revoked' && !key.is_active);
     return matchesSearch && matchesFilter;
   });
+
+  // Debug log
+  console.log('Render - keys.length:', keys.length, 'filteredKeys.length:', filteredKeys.length, 'searchTerm:', searchTerm, 'filterStatus:', filterStatus);
 
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return 'Never';
