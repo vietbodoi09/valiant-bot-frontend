@@ -920,18 +920,19 @@ request.onsuccess = async (e) => {
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px] font-bold">4</span>
-                          <span>Look for API calls containing "info", "account", or "user"</span>
+                          <span>Filter by "account" in the Network search box</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px] font-bold">5</span>
-                          <span>Click the request → <strong>Response</strong> tab → find "account_id" or "accountIndex"</span>
+                          <span>Look for URL containing <code className="bg-white/10 px-1 rounded">account_index=</code> or <code className="bg-white/10 px-1 rounded">account?by=</code></span>
                         </li>
                       </ol>
-                      <p className="mt-3 text-[10px] text-white/50">
-                        Alternative: Check <strong>Redux DevTools</strong> (if installed) → State → user → accountIndex
-                      </p>
-                      <p className="mt-1 text-[10px] text-white/50">
-                        The Account ID is a number like <code className="text-cyan-400">719083</code>
+                      <div className="mt-3 p-2 rounded bg-black/40 border border-cyan-500/20">
+                        <p className="text-[10px] text-white/60">Example URL:</p>
+                        <code className="text-[9px] text-cyan-300 font-mono break-all">https://mainnet.zklighter.ai/api/v1/apikeys?account_index=<span className="text-green-400 font-bold">719083</span></code>
+                      </div>
+                      <p className="mt-2 text-[10px] text-white/50">
+                        The Account ID is the number after <code className="bg-white/10 px-1 rounded">account_index=</code>
                       </p>
                     </div>
                   </CardContent>
