@@ -171,7 +171,8 @@ export default function BotDashboard() {
     setWsStatus('connecting');
     addLog('Connecting to live feed...');
     
-    const ws = new WebSocket(`wss://valiant-bot-backend.onrender.com/ws/${sid}`);
+    const wsUrl = API_URL.replace('https://', 'wss://').replace('http://', 'ws://');
+    const ws = new WebSocket(`${wsUrl}/ws/${sid}`);
     
     ws.onopen = () => {
       setWsStatus('connected');
@@ -300,14 +301,21 @@ export default function BotDashboard() {
           addLog('Stop already in progress...');
         } else {
           addLog('Bot stopped successfully');
-          setIsRunning(false);
-          setPositions([]);
         }
+      } else if (res.status === 404) {
+        // Session not found = server restarted, bot already gone
+        addLog('Session expired (server restarted). Cleaning up...');
       } else {
         addLog('Stop request failed');
       }
+      // Always reset state regardless of response
+      setIsRunning(false);
+      setPositions([]);
     } catch (e: any) {
       addLog(`Stop error: ${e.message}`);
+      // Still reset state on error
+      setIsRunning(false);
+      setPositions([]);
     }
     
     // Close WebSocket

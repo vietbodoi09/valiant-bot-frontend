@@ -10,7 +10,7 @@ const Footer = () => {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
               <span className="text-white font-bold text-sm">V</span>
             </div>
-            <span className="text-white font-semibold">Valiant Affiliate Dashboard</span>
+            <span className="text-white font-semibold">Valiant Bot</span>
           </div>
 
           {/* Social Links */}
