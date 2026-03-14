@@ -478,6 +478,12 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
             });
           }
         }
+        else if (msg.type === 'stats') {
+          if (msg.data) setStats(msg.data);
+        }
+        else if (msg.type === 'balances') {
+          if (msg.data) setBalances(msg.data);
+        }
         else if (msg.type === 'ping') {
           ws.send(JSON.stringify({ type: 'pong' }));
         }
