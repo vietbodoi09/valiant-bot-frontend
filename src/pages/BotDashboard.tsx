@@ -808,13 +808,13 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                       <Label className="text-white/60 text-xs flex items-center gap-1">
                         Valiant Agent Key {!apiKeys.valiant_agent_key && <span className="text-red-400">*</span>}
                       </Label>
-                      <Input type="text" value={apiKeys.valiant_agent_key}
+                      <Input type={showKeys ? 'text' : 'password'} value={apiKeys.valiant_agent_key}
                         onChange={e => setApiKeys({...apiKeys, valiant_agent_key: e.target.value})}
                         placeholder="0x..." className="bg-white/5 border-white/10 text-white placeholder:text-white/20 font-mono text-sm" />
                     </div>
                     <div className="space-y-2">
                       <Label className="text-white/60 text-xs">Master Address</Label>
-                      <Input type="text" value={apiKeys.valiant_master_address}
+                      <Input type={showKeys ? 'text' : 'password'} value={apiKeys.valiant_master_address}
                         onChange={e => setApiKeys({...apiKeys, valiant_master_address: e.target.value})}
                         placeholder="0x..." className="bg-white/5 border-white/10 text-white placeholder:text-white/20 font-mono text-sm" />
                     </div>
@@ -822,7 +822,7 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                       <Label className="text-white/60 text-xs flex items-center gap-1">
                         Lighter API Key {!apiKeys.lighter_api_key && <span className="text-red-400">*</span>}
                       </Label>
-                      <Input type="text" value={apiKeys.lighter_api_key}
+                      <Input type={showKeys ? 'text' : 'password'} value={apiKeys.lighter_api_key}
                         onChange={e => setApiKeys({...apiKeys, lighter_api_key: e.target.value})}
                         placeholder='{"2": "..."}' className="bg-white/5 border-white/10 text-white placeholder:text-white/20 font-mono text-xs" />
                     </div>
