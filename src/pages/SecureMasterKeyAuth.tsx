@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
-const API_URL = 'https://valiant-bot-be-01.fly.app';
+const API_URL = 'https://valiant-bot-be-01.fly.dev';
 
 interface SecureMasterKeyAuthProps {
   onAuthenticated: () => void;
