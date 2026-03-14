@@ -10,7 +10,8 @@ import AdminDashboard from './pages/AdminDashboard';
 
 const AUTH_API_URL = 'https://valiant-bot-be-01.fly.dev';
 
-function App() {
+// Separate component to use useNavigate inside Router context
+function AppContent() {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authToken, setAuthToken] = useState<string | null>(null);
@@ -87,37 +88,43 @@ function App() {
 
   return (
     <WalletProvider>
-      <Router>
-        <div className="min-h-screen bg-[#0a0a0a] text-white">
-          <Header />
-          <main>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              
-              {/* User Bot Dashboard */}
-              <Route 
-                path="/bot" 
-                element={
-                  isAuthenticated ? (
-                    <BotDashboard 
-                      onLogout={handleLogout} 
-                      authToken={authToken}
-                      keyName={keyName}
-                    />
-                  ) : (
-                    <SecureMasterKeyAuth onAuthenticated={handleAuthenticated} />
-                  )
-                } 
-              />
-              
-              {/* Admin Dashboard */}
-              <Route path="/admin" element={<AdminDashboard onLogout={handleLogout} />} />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
-      </Router>
+      <div className="min-h-screen bg-[#0a0a0a] text-white">
+        <Header />
+        <main>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            
+            {/* User Bot Dashboard */}
+            <Route 
+              path="/bot" 
+              element={
+                isAuthenticated ? (
+                  <BotDashboard 
+                    onLogout={handleLogout} 
+                    authToken={authToken}
+                    keyName={keyName}
+                  />
+                ) : (
+                  <SecureMasterKeyAuth onAuthenticated={handleAuthenticated} />
+                )
+              } 
+            />
+            
+            {/* Admin Dashboard */}
+            <Route path="/admin" element={<AdminDashboard onLogout={handleLogout} />} />
+          </Routes>
+        </main>
+        <Footer />
+      </div>
     </WalletProvider>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
   );
 }
 
