@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   Shield, Key, Plus, Trash2, Copy, Check, RefreshCw, 
   Users, Ban, CheckCircle, AlertCircle,
@@ -58,8 +58,12 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [expandedKey, setExpandedKey] = useState<string | null>(null);
   const [adminKey, setAdminKey] = useState('');
 
-  // Load keys and stats
+  // Load keys and stats (only once on mount)
+  const hasFetchedRef = useRef(false);
   useEffect(() => {
+    if (hasFetchedRef.current) return;
+    hasFetchedRef.current = true;
+    
     const savedAdminKey = localStorage.getItem('valiant_admin_key');
     if (savedAdminKey) {
       setAdminKey(savedAdminKey);
