@@ -9,7 +9,6 @@ function App() {
   const [isAuth, setIsAuth] = useState(false);
 
   useEffect(() => {
-    // Check existing token
     const token = localStorage.getItem('valiant_jwt_token');
     const expiry = localStorage.getItem('valiant_token_expiry');
     if (token && expiry && new Date(expiry) > new Date()) {
@@ -37,7 +36,7 @@ function App() {
             )
           } 
         />
-        <Route path="/admin" element={<AdminDashboard onLogout={handleLogout} />} />
+        <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
     </Router>
   );
