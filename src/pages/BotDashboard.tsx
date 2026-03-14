@@ -192,20 +192,23 @@ function PositionCard({ position }: { position: Position }) {
 
 function StatCard({ icon: Icon, label, value, prefix = '', suffix = '', trend, trendValue, color = 'orange' }: { 
   icon: any; label: string; value: number; prefix?: string; suffix?: string; 
-  trend?: 'up' | 'down' | 'neutral'; trendValue?: string; color?: 'orange' | 'green' | 'blue' | 'purple';
+  trend?: 'up' | 'down' | 'neutral'; trendValue?: string; color?: 'orange' | 'green' | 'blue' | 'purple' | 'cyan' | 'pink';
 }) {
   const colorClasses = {
     orange: 'from-orange-500/20 to-orange-600/10 border-orange-500/20',
     green: 'from-green-500/20 to-green-600/10 border-green-500/20',
     blue: 'from-blue-500/20 to-blue-600/10 border-blue-500/20',
     purple: 'from-purple-500/20 to-purple-600/10 border-purple-500/20',
+    cyan: 'from-cyan-500/20 to-cyan-600/10 border-cyan-500/20',
+    pink: 'from-pink-500/20 to-pink-600/10 border-pink-500/20',
   };
 
   return (
     <div className={cn('relative overflow-hidden rounded-2xl border bg-gradient-to-br p-5 transition-all duration-300 hover:scale-[1.02]', colorClasses[color])}>
       <div className={cn('absolute -top-10 -right-10 w-20 h-20 rounded-full blur-2xl opacity-30',
         color === 'orange' && 'bg-orange-500', color === 'green' && 'bg-green-500',
-        color === 'blue' && 'bg-blue-500', color === 'purple' && 'bg-purple-500')} />
+        color === 'blue' && 'bg-blue-500', color === 'purple' && 'bg-purple-500',
+        color === 'cyan' && 'bg-cyan-500', color === 'pink' && 'bg-pink-500')} />
       <div className="relative z-10">
         <div className="flex items-center gap-2 text-white/50 text-sm mb-2">
           <Icon className="w-4 h-4" /> {label}
@@ -679,14 +682,17 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
         </div>
 
         <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <StatCard icon={DollarSign} label="Net PnL" value={netPnl} prefix="$" 
-              trend={netPnl >= 0 ? 'up' : 'down'} trendValue={netPnl >= 0 ? '+Profitable' : '-Loss'} 
-              color={netPnl >= 0 ? 'green' : 'orange'} />
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+            <StatCard icon={DollarSign} label="Session PnL" value={stats.total_pnl || 0} prefix="$" 
+              trend={(stats.total_pnl || 0) >= 0 ? 'up' : 'down'} trendValue={(stats.total_pnl || 0) >= 0 ? '+Profit' : '-Loss'} 
+              color={(stats.total_pnl || 0) >= 0 ? 'green' : 'orange'} />
             <StatCard icon={BarChart3} label="Total Trades" value={stats.total_trades || 0} color="blue" />
             <StatCard icon={Activity} label="Volume" value={stats.total_volume || 0} prefix="$" color="purple" />
             <StatCard icon={Shield} label="Status" value={isRunning ? 1 : 0} suffix={isRunning ? 'Active' : 'Idle'} 
               color={isRunning ? 'green' : 'orange'} />
+            <StatCard icon={Wallet} label="HL Balance" value={balances.hyperliquid || 0} prefix="$" color="cyan" />
+            <StatCard icon={Wallet} label="Lighter Balance" value={balances.lighter || 0} prefix="$" color="pink" />
           </div>
 
           {totalBalance > 0 && (
