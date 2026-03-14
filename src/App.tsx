@@ -4,7 +4,7 @@ import HomePage from './pages/HomePage';
 import BotDashboard from './pages/BotDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 
-const API_URL = 'https://valiant-bot-be-01.fly.app';
+const API_URL = 'https://valiant-bot-be-01.fly.dev';
 
 // Simple auth check component
 function SecureRoute({ children }: { children: React.ReactNode }) {
