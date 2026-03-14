@@ -144,17 +144,29 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const fetchData = useCallback(async (key: string) => {
     try {
       setLoading(true);
+      const keysUrl = `${API_URL}/api/admin/keys?admin_key=${encodeURIComponent(key)}`;
+      const statsUrl = `${API_URL}/api/admin/stats?admin_key=${encodeURIComponent(key)}`;
+      
+      console.log('Fetching keys from:', keysUrl);
+      
       const [keysRes, statsRes] = await Promise.all([
-        fetch(`${API_URL}/api/admin/keys?admin_key=${encodeURIComponent(key)}`),
-        fetch(`${API_URL}/api/admin/stats?admin_key=${encodeURIComponent(key)}`)
+        fetch(keysUrl),
+        fetch(statsUrl)
       ]);
 
       if (keysRes.ok && statsRes.ok) {
         const keysData = await keysRes.json();
         const statsData = await statsRes.json();
-        setKeys(keysData.keys);
+        
+        console.log('Keys response:', keysData);
+        console.log('Stats response:', statsData);
+        
+        // Handle different response structures
+        const keysArray = keysData.keys || keysData.data || (Array.isArray(keysData) ? keysData : []);
+        setKeys(keysArray);
         setStats(statsData);
       } else {
+        console.error('Fetch failed:', keysRes.status, statsRes.status);
         // Invalid admin key
         setIsAdminAuthenticated(false);
         setAdminKey('');
