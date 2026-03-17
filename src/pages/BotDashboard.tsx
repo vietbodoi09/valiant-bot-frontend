@@ -354,8 +354,13 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
       try {
         const parsed = JSON.parse(selectedPair);
         if (parsed.symbol) {
-          setConfig(prev => ({ ...prev, symbol: parsed.symbol, mode: 'hedge' }));
-          setActiveTab('config');
+          console.log('Applying selected pair:', parsed);
+          setConfig(prev => {
+            const updated = { ...prev, symbol: parsed.symbol, mode: 'hedge' as const };
+            // Also save to localStorage immediately so it persists
+            localStorage.setItem('valiant_config', JSON.stringify(updated));
+            return updated;
+          });
           addLog(`Selected ${parsed.symbol} from Funding Scanner (Long ${parsed.longEx}, Short ${parsed.shortEx})`);
         }
       } catch (e) {
