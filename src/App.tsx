@@ -7,8 +7,22 @@ import HomePage from './pages/HomePage';
 import BotDashboard from './pages/BotDashboard';
 import SecureMasterKeyAuth from './pages/SecureMasterKeyAuth';
 import AdminDashboard from './pages/AdminDashboard';
+import FundingScanner from './pages/FundingScanner';
 
 const AUTH_API_URL = 'https://valiant-bot-be-01.fly.dev';
+
+function FundingScannerPage() {
+  const navigate = useNavigate();
+  return (
+    <div className="pt-20 pb-12 px-4 max-w-7xl mx-auto">
+      <FundingScanner onSelectPair={(symbol, longEx, shortEx) => {
+        // Save selected pair to localStorage so BotDashboard can pick it up
+        localStorage.setItem('valiant_selected_pair', JSON.stringify({ symbol, longEx, shortEx }));
+        navigate('/bot');
+      }} />
+    </div>
+  );
+}
 
 // Separate component to use useNavigate inside Router context
 function AppContent() {
@@ -112,6 +126,9 @@ function AppContent() {
             
             {/* Admin Dashboard */}
             <Route path="/admin" element={<AdminDashboard onLogout={handleLogout} />} />
+            
+            {/* Funding Scanner - public */}
+            <Route path="/scan" element={<FundingScannerPage />} />
           </Routes>
         </main>
         <Footer />
