@@ -352,12 +352,15 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
     const selectedPair = localStorage.getItem('valiant_selected_pair');
     if (selectedPair) {
       try {
-        const { symbol } = JSON.parse(selectedPair);
-        if (symbol && symbol !== config.symbol) {
-          setConfig(prev => ({ ...prev, symbol, mode: 'hedge' }));
+        const parsed = JSON.parse(selectedPair);
+        if (parsed.symbol) {
+          setConfig(prev => ({ ...prev, symbol: parsed.symbol, mode: 'hedge' }));
           setActiveTab('config');
+          addLog(`Selected ${parsed.symbol} from Funding Scanner (Long ${parsed.longEx}, Short ${parsed.shortEx})`);
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error('Failed to parse selected pair:', e);
+      }
       localStorage.removeItem('valiant_selected_pair');
     }
   }, []);
