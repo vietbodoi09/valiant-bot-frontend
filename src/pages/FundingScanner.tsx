@@ -11,6 +11,8 @@ import { cn } from '@/lib/utils';
 
 const API_URL = 'https://valiant-bot-be-01.fly.dev';
 
+import TokenIcon from '@/components/TokenIcon';
+
 interface FundingOpportunity {
   symbol: string;
   price: number;
@@ -65,9 +67,7 @@ function FundingCard({ opp, onSelect }: { opp: FundingOpportunity; onSelect: () 
         {/* Header: Symbol + Quality */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-lg font-bold text-white">
-              {opp.symbol.substring(0, 2)}
-            </div>
+            <TokenIcon symbol={opp.symbol} size={40} />
             <div>
               <div className="text-white font-bold text-lg">{opp.symbol}</div>
               <div className="text-white/40 text-xs">
