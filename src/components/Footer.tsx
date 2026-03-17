@@ -1,50 +1,40 @@
-import { Twitter, MessageCircle, ExternalLink } from 'lucide-react';
+import { Twitter, MessageCircle, ExternalLink, Activity } from 'lucide-react';
 
 const Footer = () => {
   return (
-    <footer className="border-t border-white/5 bg-[#0a0a0a]">
+    <footer className="border-t border-white/[0.04] bg-[#060608]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          {/* Logo */}
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">V</span>
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center">
+              <Activity className="w-4 h-4 text-white" strokeWidth={2.5} />
             </div>
-            <span className="text-white font-semibold">Valiant Bot</span>
+            <div className="flex items-baseline gap-0.5">
+              <span className="text-white font-bold text-sm">Val</span>
+              <span className="text-emerald-400 font-bold text-sm">Bot</span>
+            </div>
+            <span className="text-white/20 text-xs ml-1">Delta-Neutral Engine</span>
           </div>
 
-          {/* Social Links */}
-          <div className="flex items-center gap-4">
-            <a
-              href="https://valiant.trade"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 text-white/60 hover:text-orange-400 transition-colors"
-            >
-              <ExternalLink size={16} />
-              <span className="text-sm">Valiant Trade</span>
+          <div className="flex items-center gap-3">
+            <a href="https://valiant.trade" target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-white/40 hover:text-emerald-400 transition-colors text-xs">
+              <ExternalLink size={13} />
+              valiant.trade
             </a>
-            <a
-              href="https://x.com/valianttrade"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/60 hover:text-orange-400 hover:bg-white/10 transition-colors"
-            >
-              <Twitter size={18} />
+            <div className="w-px h-4 bg-white/10" />
+            <a href="https://x.com/valianttrade" target="_blank" rel="noopener noreferrer"
+              className="w-8 h-8 rounded-lg bg-white/[0.03] flex items-center justify-center text-white/30 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all">
+              <Twitter size={14} />
             </a>
-            <a
-              href="https://t.me/valianttrade"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/60 hover:text-orange-400 hover:bg-white/10 transition-colors"
-            >
-              <MessageCircle size={18} />
+            <a href="https://t.me/valianttrade" target="_blank" rel="noopener noreferrer"
+              className="w-8 h-8 rounded-lg bg-white/[0.03] flex items-center justify-center text-white/30 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all">
+              <MessageCircle size={14} />
             </a>
           </div>
 
-          {/* Copyright */}
-          <p className="text-sm text-white/40">
-            &copy; 2026 Valiant. All rights reserved.
+          <p className="text-[11px] text-white/20">
+            &copy; 2026 ValBot
           </p>
         </div>
       </div>
