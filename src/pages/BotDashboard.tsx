@@ -1017,13 +1017,21 @@ request.onsuccess = async (e) => {
                       </div>
                       <div className="space-y-2">
                         <Label className="text-white/60 text-xs">Symbol</Label>
-                        <select value={config.symbol}
-                          onChange={e => setConfig({...config, symbol: e.target.value})}
-                          className="w-full px-3 py-2 bg-black border border-white/10 rounded-lg text-white text-sm appearance-none cursor-pointer">
-                          <option value="BTC" className="bg-black text-white">BTC</option>
-                          <option value="ETH" className="bg-black text-white">ETH</option>
-                          <option value="SOL" className="bg-black text-white">SOL</option>
-                        </select>
+                        <Input 
+                          value={config.symbol}
+                          onChange={e => setConfig({...config, symbol: e.target.value.toUpperCase()})}
+                          placeholder="BTC, ETH, SOL, HYPE..."
+                          className="bg-black border-white/10 text-white text-sm"
+                          list="symbol-list"
+                        />
+                        <datalist id="symbol-list">
+                          {['BTC','ETH','SOL','HYPE','XRP','DOGE','LINK','AVAX','SUI','PEPE',
+                            'APT','ADA','WIF','ONDO','PENGU','KAITO','BERA','TIA','TRUMP',
+                            'BNB','ARB','UNI','JUP','ENA','WLD','DOT','FARTCOIN',
+                            'NVDA','HOOD','AAPL','COIN','GOLD'].map(s => (
+                            <option key={s} value={s} />
+                          ))}
+                        </datalist>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
