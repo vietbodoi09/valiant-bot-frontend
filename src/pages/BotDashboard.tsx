@@ -357,10 +357,11 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
           console.log('Applying selected pair:', parsed);
           setConfig(prev => {
             const updated = { ...prev, symbol: parsed.symbol, mode: 'hedge' as const };
-            // Also save to localStorage immediately so it persists
             localStorage.setItem('valiant_config', JSON.stringify(updated));
             return updated;
           });
+          // Switch to config tab so user sees the change
+          setTimeout(() => setActiveTab('config'), 100);
           addLog(`Selected ${parsed.symbol} from Funding Scanner (Long ${parsed.longEx}, Short ${parsed.shortEx})`);
         }
       } catch (e) {
