@@ -124,29 +124,7 @@ function AnimatedNumber({ value, prefix = '', suffix = '', decimals = 2, classNa
   return <span className={className}>{prefix}{displayValue.toFixed(decimals)}{suffix ? ' ' + suffix : ''}</span>;
 }
 
-function getTokenIcon(symbol: string): string {
-  // Use CoinGecko/CryptoCompare style icons
-  const s = symbol.toUpperCase().replace('-USD', '').replace('-PERP', '');
-  return `https://raw.githubusercontent.com/nicehash/cryptocurrency-icons/master/svg/${s.toLowerCase()}.svg`;
-}
-
-function TokenIcon({ symbol, size = 'w-10 h-10' }: { symbol: string; size?: string }) {
-  const clean = symbol.toUpperCase().replace('-USD', '').replace('-PERP', '');
-  return (
-    <img 
-      src={getTokenIcon(clean)} 
-      alt={clean}
-      className={cn(size, 'rounded-full')}
-      onError={(e) => {
-        // Fallback: show first 2 letters
-        const target = e.target as HTMLImageElement;
-        target.style.display = 'none';
-        target.parentElement?.classList.add('flex', 'items-center', 'justify-center', 'bg-white/10', 'text-white', 'font-bold', 'text-sm');
-        if (target.parentElement) target.parentElement.textContent = clean.substring(0, 2);
-      }}
-    />
-  );
-}
+import TokenIcon from '@/components/TokenIcon';
 
 function PositionCard({ position }: { position: Position }) {
   const isLong = position.side === 'long';
@@ -184,9 +162,7 @@ function PositionCard({ position }: { position: Position }) {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <div className="w-5 h-5 rounded-full overflow-hidden">
-                  <TokenIcon symbol={symbol} size="w-5 h-5" />
-                </div>
+                <TokenIcon symbol={symbol} size={20} />
                 <span className="text-white font-semibold">{symbol}</span>
               </div>
               <div className="text-white/50 text-xs">{exchangeName}</div>
