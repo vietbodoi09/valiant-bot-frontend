@@ -347,6 +347,21 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
   useEffect(() => { localStorage.setItem('valiant_api_keys', JSON.stringify(apiKeys)); }, [apiKeys]);
   useEffect(() => { localStorage.setItem('valiant_config', JSON.stringify(config)); }, [config]);
 
+  // Pick up selected pair from FundingScanner
+  useEffect(() => {
+    const selectedPair = localStorage.getItem('valiant_selected_pair');
+    if (selectedPair) {
+      try {
+        const { symbol } = JSON.parse(selectedPair);
+        if (symbol && symbol !== config.symbol) {
+          setConfig(prev => ({ ...prev, symbol, mode: 'hedge' }));
+          setActiveTab('config');
+        }
+      } catch (e) {}
+      localStorage.removeItem('valiant_selected_pair');
+    }
+  }, []);
+
   const parseLogType = (message: string): 'info' | 'success' | 'error' | 'warning' => {
     const lower = message.toLowerCase();
     if (lower.includes('error') || lower.includes('failed') || lower.includes('G��')) return 'error';
