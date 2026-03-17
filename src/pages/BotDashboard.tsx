@@ -206,7 +206,7 @@ function StatCard({ icon: Icon, label, value, prefix = '', suffix = '', trend, t
   trend?: 'up' | 'down' | 'neutral'; trendValue?: string; color?: 'orange' | 'green' | 'blue' | 'purple' | 'cyan' | 'pink';
 }) {
   const colorClasses = {
-    orange: 'from-orange-500/20 to-orange-600/10 border-orange-500/20',
+    orange: 'from-emerald-500/20 to-emerald-600/10 border-emerald-500/20',
     green: 'from-green-500/20 to-green-600/10 border-green-500/20',
     blue: 'from-blue-500/20 to-blue-600/10 border-blue-500/20',
     purple: 'from-purple-500/20 to-purple-600/10 border-purple-500/20',
@@ -217,7 +217,7 @@ function StatCard({ icon: Icon, label, value, prefix = '', suffix = '', trend, t
   return (
     <div className={cn('relative overflow-hidden rounded-2xl border bg-gradient-to-br p-5 transition-all duration-300 hover:scale-[1.02]', colorClasses[color])}>
       <div className={cn('absolute -top-10 -right-10 w-20 h-20 rounded-full blur-2xl opacity-30',
-        color === 'orange' && 'bg-orange-500', color === 'green' && 'bg-green-500',
+        color === 'orange' && 'bg-emerald-500', color === 'green' && 'bg-green-500',
         color === 'blue' && 'bg-blue-500', color === 'purple' && 'bg-purple-500',
         color === 'cyan' && 'bg-cyan-500', color === 'pink' && 'bg-pink-500')} />
       <div className="relative z-10">
@@ -314,7 +314,7 @@ function LiveLog({ logs }: { logs: LogEntry[] }) {
       {!wasAtBottom && (
         <Button variant="secondary" size="sm"
           onClick={() => containerRef.current?.scrollTo({ top: containerRef.current.scrollHeight, behavior: 'smooth' })}
-          className="absolute bottom-4 right-4 h-8 text-xs bg-orange-500/90 hover:bg-orange-500">
+          className="absolute bottom-4 right-4 h-8 text-xs bg-emerald-500/90 hover:bg-emerald-500">
           Scroll to bottom
         </Button>
       )}
@@ -659,21 +659,21 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
       <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#0d0d0d] to-[#0a0a0a] flex items-center justify-center">
         <div className="text-center animate-in fade-in zoom-in duration-500">
           <div className="relative w-28 h-28 mx-auto mb-8">
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 animate-pulse opacity-50 blur-xl" />
-            <div className="relative w-28 h-28 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center border border-orange-400/30 shadow-2xl shadow-orange-500/30">
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 animate-pulse opacity-50 blur-xl" />
+            <div className="relative w-28 h-28 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center border border-emerald-400/30 shadow-2xl shadow-emerald-500/30">
               <Zap className="w-14 h-14 text-white animate-pulse" />
             </div>
-            <div className="absolute -inset-3 rounded-3xl border-2 border-orange-500/30 border-t-orange-500 animate-spin" style={{ animationDuration: '2s' }} />
+            <div className="absolute -inset-3 rounded-3xl border-2 border-emerald-500/30 border-t-emerald-500 animate-spin" style={{ animationDuration: '2s' }} />
           </div>
-          <h1 className="text-4xl font-bold text-white mb-3">Valiant Bot</h1>
+          <h1 className="text-4xl font-bold text-white mb-3">ValBot</h1>
           <div className="flex items-center justify-center gap-2 text-white/60">
             <Loader2 className="w-5 h-5 animate-spin" />
             <span>Connecting to backend...</span>
           </div>
           <div className="flex items-center justify-center gap-2 mt-8">
-            <div className="w-2.5 h-2.5 rounded-full bg-orange-500 animate-bounce" style={{ animationDelay: '0ms' }} />
-            <div className="w-2.5 h-2.5 rounded-full bg-orange-500 animate-bounce" style={{ animationDelay: '150ms' }} />
-            <div className="w-2.5 h-2.5 rounded-full bg-orange-500 animate-bounce" style={{ animationDelay: '300ms' }} />
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: '0ms' }} />
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: '150ms' }} />
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: '300ms' }} />
           </div>
         </div>
       </div>
@@ -704,8 +704,8 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
     <TooltipProvider>
       <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#0d0d0d] to-[#0a0a0a]">
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-orange-500/5 rounded-full blur-[120px]" />
-          <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-orange-600/5 rounded-full blur-[100px]" />
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-[120px]" />
+          <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-emerald-600/5 rounded-full blur-[100px]" />
         </div>
 
         {/* Status Bar - Only status/session/logout, no duplicate title */}
@@ -725,7 +725,7 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Badge variant="outline" onClick={copySession}
-                    className="border-white/10 text-white/60 font-mono text-xs cursor-pointer hover:border-orange-500/50 transition-colors">
+                    className="border-white/10 text-white/60 font-mono text-xs cursor-pointer hover:border-emerald-500/50 transition-colors">
                     {sessionId} <Copy className="w-3 h-3 ml-2" />
                   </Badge>
                 </TooltipTrigger>
@@ -798,10 +798,10 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="bg-black/40 border border-white/10 p-1">
-              <TabsTrigger value="overview" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">
+              <TabsTrigger value="overview" className="data-[state=active]:bg-emerald-500 data-[state=active]:text-white">
                 <Activity className="w-4 h-4 mr-2" /> Overview
               </TabsTrigger>
-              <TabsTrigger value="config" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">
+              <TabsTrigger value="config" className="data-[state=active]:bg-emerald-500 data-[state=active]:text-white">
                 <Settings2 className="w-4 h-4 mr-2" /> Configuration
               </TabsTrigger>
             </TabsList>
@@ -811,7 +811,7 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
               {positions.length > 0 && (
                 <div>
                   <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-orange-400" /> Active Positions
+                    <TrendingUp className="w-5 h-5 text-emerald-400" /> Active Positions
                   </h3>
                   <div className="grid md:grid-cols-2 gap-4">
                     {positions.map((pos, i) => <PositionCard key={i} position={pos} />)}
@@ -823,7 +823,7 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
               <div className="flex flex-wrap gap-3">
                 {!isRunning ? (
                   <Button onClick={handleStart} disabled={loading || !apiKeys.valiant_agent_key || !apiKeys.lighter_api_key}
-                    className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-white font-semibold px-8 py-6 text-lg rounded-xl shadow-lg shadow-orange-500/20">
+                    className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-semibold px-8 py-6 text-lg rounded-xl shadow-lg shadow-emerald-500/20">
                     {loading ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Play className="w-5 h-5 mr-2" />}
                     {loading ? 'Starting...' : 'Start Bot'}
                   </Button>
@@ -850,7 +850,7 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-white flex items-center gap-2 text-base">
-                        <Key className="w-4 h-4 text-orange-400" /> API Keys
+                        <Key className="w-4 h-4 text-emerald-400" /> API Keys
                       </CardTitle>
                       <Button variant="ghost" size="sm" onClick={() => setShowKeys(!showKeys)} className="text-white/40 hover:text-white">
                         {showKeys ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -860,7 +860,7 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                   <CardContent className="space-y-4 pt-0">
                     <div className="space-y-2">
                       <Label className="text-white/60 text-xs flex items-center gap-1">
-                        Valiant Agent Key {!apiKeys.valiant_agent_key && <span className="text-red-400">*</span>}
+                        Agent Key {!apiKeys.valiant_agent_key && <span className="text-red-400">*</span>}
                       </Label>
                       <Input type={showKeys ? 'text' : 'password'} value={apiKeys.valiant_agent_key}
                         onChange={e => setApiKeys({...apiKeys, valiant_agent_key: e.target.value})}
@@ -895,27 +895,27 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                       </div>
                     </div>
 
-                    {/* Valiant Agent Key Guide - Always Visible */}
-                    <div className="mt-4 p-4 rounded-xl bg-gradient-to-br from-orange-500/10 to-amber-500/10 border border-orange-500/20">
+                    {/* Agent Key Guide - Always Visible */}
+                    <div className="mt-4 p-4 rounded-xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20">
                       <div className="flex items-center gap-2 mb-3">
-                        <Info className="w-4 h-4 text-orange-400" />
-                        <h4 className="text-orange-300 font-medium text-sm">How to Get Your Valiant Agent Key</h4>
+                        <Info className="w-4 h-4 text-emerald-400" />
+                        <h4 className="text-emerald-300 font-medium text-sm">How to Get Your Agent Key</h4>
                       </div>
                       <ol className="space-y-2 text-xs text-white/70">
                         <li className="flex items-start gap-2">
-                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-[10px] font-bold">1</span>
-                          <span>Go to <a href="https://valiant.trade/perps" target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:text-orange-300 underline inline-flex items-center gap-1">valiant.trade/perps <ExternalLink className="w-3 h-3" /></a> and connect your wallet</span>
+                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px] font-bold">1</span>
+                          <span>Go to <a href="https://valiant.trade/perps" target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:text-emerald-300 underline inline-flex items-center gap-1">valiant.trade/perps <ExternalLink className="w-3 h-3" /></a> and connect your wallet</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-[10px] font-bold">2</span>
+                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px] font-bold">2</span>
                           <span>Press <kbd className="px-1.5 py-0.5 bg-white/10 rounded text-[10px]">F12</kbd> to open Developer Tools</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-[10px] font-bold">3</span>
+                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px] font-bold">3</span>
                           <span>Go to the <strong>Console</strong> tab</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-[10px] font-bold">4</span>
+                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px] font-bold">4</span>
                           <span>Copy & paste the code below, then press Enter:</span>
                         </li>
                       </ol>
@@ -943,9 +943,9 @@ request.onsuccess = async (e) => {
 };`}</code>
                       </div>
                       <p className="mt-2 text-[10px] text-white/50">
-                        Replace <code className="text-orange-400">YOUR_WALLET_ADDRESS</code> with your actual wallet address
+                        Replace <code className="text-emerald-400">YOUR_WALLET_ADDRESS</code> with your actual wallet address
                       </p>
-                      <div className="mt-3 pt-3 border-t border-orange-500/20">
+                      <div className="mt-3 pt-3 border-t border-emerald-500/20">
                         <p className="text-[10px] text-white/50 flex items-center gap-1">
                           <Shield className="w-3 h-3" />
                           Your keys are stored locally in your browser and never sent to our servers.
@@ -995,7 +995,7 @@ request.onsuccess = async (e) => {
                 <Card className="bg-black/40 backdrop-blur border-white/5">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-white flex items-center gap-2 text-base">
-                      <Target className="w-4 h-4 text-orange-400" /> Trading Config
+                      <Target className="w-4 h-4 text-emerald-400" /> Trading Config
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -1089,7 +1089,7 @@ request.onsuccess = async (e) => {
                     <div className="flex items-center gap-3 p-3 rounded-lg bg-white/5">
                       <input type="checkbox" id="autoReenter" checked={config.auto_reenter}
                         onChange={e => setConfig({...config, auto_reenter: e.target.checked})}
-                        className="w-4 h-4 rounded border-white/20 bg-white/5 text-orange-500 focus:ring-orange-500" />
+                        className="w-4 h-4 rounded border-white/20 bg-white/5 text-emerald-500 focus:ring-emerald-500" />
                       <Label htmlFor="autoReenter" className="text-white/80 text-sm cursor-pointer flex-1">
                         Auto re-enter after cycle
                       </Label>
@@ -1097,7 +1097,7 @@ request.onsuccess = async (e) => {
                     <Separator className="bg-white/10" />
                     {!isRunning ? (
                       <Button onClick={handleStart} disabled={loading || !apiKeys.valiant_agent_key || !apiKeys.lighter_api_key}
-                        className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-white font-semibold py-6 rounded-xl shadow-lg shadow-orange-500/20">
+                        className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-semibold py-6 rounded-xl shadow-lg shadow-emerald-500/20">
                         {loading ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Play className="w-5 h-5 mr-2" />}
                         {loading ? 'Starting...' : 'Start Bot'}
                       </Button>
