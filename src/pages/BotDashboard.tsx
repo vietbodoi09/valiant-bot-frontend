@@ -129,10 +129,10 @@ import TokenIcon from '@/components/TokenIcon';
 function PositionCard({ position }: { position: Position }) {
   const isLong = position.side === 'long';
   const isProfit = position.pnl >= 0;
+  const isPnlPctPositive = position.pnl_percent >= 0;
   const exchangeColor = position.exchange === 'hyperliquid' 
     ? 'from-blue-500/20 to-blue-600/10 border-blue-500/30' 
     : 'from-purple-500/20 to-purple-600/10 border-purple-500/30';
-  const exchangeIcon = position.exchange === 'hyperliquid' ? 'HL' : 'LT';
   const exchangeName = position.exchange === 'hyperliquid' ? 'Hyperliquid' : 'Lighter';
   const symbol = position.symbol.replace('-USD', '').replace('-PERP', '');
   
@@ -156,15 +156,9 @@ function PositionCard({ position }: { position: Position }) {
       <div className="relative z-10">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className={cn('w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center',
-              position.exchange === 'hyperliquid' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400')}>
-              {exchangeIcon}
-            </div>
+            <TokenIcon symbol={symbol} size={40} />
             <div>
-              <div className="flex items-center gap-2">
-                <TokenIcon symbol={symbol} size={20} />
-                <span className="text-white font-semibold">{symbol}</span>
-              </div>
+              <div className="text-white font-semibold">{symbol}</div>
               <div className="text-white/50 text-xs">{exchangeName}</div>
             </div>
           </div>
@@ -176,10 +170,10 @@ function PositionCard({ position }: { position: Position }) {
         <div className="mb-4">
           <div className={cn('text-3xl font-bold flex items-center gap-2', isProfit ? 'text-green-400' : 'text-red-400')}>
             {isProfit ? <ArrowUpRight className="w-6 h-6" /> : <ArrowDownRight className="w-6 h-6" />}
-            {isProfit ? '+' : ''}${Math.abs(position.pnl).toFixed(2)}
+            {isProfit ? '+' : '-'}${Math.abs(position.pnl).toFixed(2)}
           </div>
-          <div className={cn('text-sm font-medium', isProfit ? 'text-green-400/70' : 'text-red-400/70')}>
-            {isProfit ? '+' : ''}{position.pnl_percent.toFixed(2)}%
+          <div className={cn('text-sm font-medium', isPnlPctPositive ? 'text-green-400/70' : 'text-red-400/70')}>
+            {isPnlPctPositive ? '+' : ''}{position.pnl_percent.toFixed(2)}%
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3 text-sm">
