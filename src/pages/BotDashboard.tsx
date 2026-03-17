@@ -124,6 +124,30 @@ function AnimatedNumber({ value, prefix = '', suffix = '', decimals = 2, classNa
   return <span className={className}>{prefix}{displayValue.toFixed(decimals)}{suffix ? ' ' + suffix : ''}</span>;
 }
 
+function getTokenIcon(symbol: string): string {
+  // Use CoinGecko/CryptoCompare style icons
+  const s = symbol.toUpperCase().replace('-USD', '').replace('-PERP', '');
+  return `https://raw.githubusercontent.com/nicehash/cryptocurrency-icons/master/svg/${s.toLowerCase()}.svg`;
+}
+
+function TokenIcon({ symbol, size = 'w-10 h-10' }: { symbol: string; size?: string }) {
+  const clean = symbol.toUpperCase().replace('-USD', '').replace('-PERP', '');
+  return (
+    <img 
+      src={getTokenIcon(clean)} 
+      alt={clean}
+      className={cn(size, 'rounded-full')}
+      onError={(e) => {
+        // Fallback: show first 2 letters
+        const target = e.target as HTMLImageElement;
+        target.style.display = 'none';
+        target.parentElement?.classList.add('flex', 'items-center', 'justify-center', 'bg-white/10', 'text-white', 'font-bold', 'text-sm');
+        if (target.parentElement) target.parentElement.textContent = clean.substring(0, 2);
+      }}
+    />
+  );
+}
+
 function PositionCard({ position }: { position: Position }) {
   const isLong = position.side === 'long';
   const isProfit = position.pnl >= 0;
@@ -132,6 +156,20 @@ function PositionCard({ position }: { position: Position }) {
     : 'from-purple-500/20 to-purple-600/10 border-purple-500/30';
   const exchangeIcon = position.exchange === 'hyperliquid' ? 'HL' : 'LT';
   const exchangeName = position.exchange === 'hyperliquid' ? 'Hyperliquid' : 'Lighter';
+  const symbol = position.symbol.replace('-USD', '').replace('-PERP', '');
+  
+  const formatPrice = (p: number) => {
+    if (p >= 1000) return `$${p.toLocaleString(undefined, {maximumFractionDigits: 2})}`;
+    if (p >= 1) return `$${p.toFixed(3)}`;
+    if (p >= 0.01) return `$${p.toFixed(5)}`;
+    return `$${p.toFixed(8)}`;
+  };
+  
+  const formatSize = (s: number) => {
+    if (s >= 1000) return s.toFixed(1);
+    if (s >= 1) return s.toFixed(3);
+    return s.toFixed(6);
+  };
 
   return (
     <div className={cn('relative overflow-hidden rounded-2xl border bg-gradient-to-br p-5 transition-all duration-300 hover:scale-[1.02]', exchangeColor)}>
@@ -140,12 +178,17 @@ function PositionCard({ position }: { position: Position }) {
       <div className="relative z-10">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold',
+            <div className={cn('w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center',
               position.exchange === 'hyperliquid' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400')}>
               {exchangeIcon}
             </div>
             <div>
-              <div className="text-white font-semibold">{position.symbol}</div>
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded-full overflow-hidden">
+                  <TokenIcon symbol={symbol} size="w-5 h-5" />
+                </div>
+                <span className="text-white font-semibold">{symbol}</span>
+              </div>
               <div className="text-white/50 text-xs">{exchangeName}</div>
             </div>
           </div>
@@ -157,7 +200,7 @@ function PositionCard({ position }: { position: Position }) {
         <div className="mb-4">
           <div className={cn('text-3xl font-bold flex items-center gap-2', isProfit ? 'text-green-400' : 'text-red-400')}>
             {isProfit ? <ArrowUpRight className="w-6 h-6" /> : <ArrowDownRight className="w-6 h-6" />}
-            {isProfit ? '+' : ''}${position.pnl.toFixed(2)}
+            {isProfit ? '+' : ''}${Math.abs(position.pnl).toFixed(2)}
           </div>
           <div className={cn('text-sm font-medium', isProfit ? 'text-green-400/70' : 'text-red-400/70')}>
             {isProfit ? '+' : ''}{position.pnl_percent.toFixed(2)}%
@@ -166,20 +209,20 @@ function PositionCard({ position }: { position: Position }) {
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div className="bg-black/30 rounded-lg p-2.5">
             <div className="text-white/40 text-xs mb-1">Size</div>
-            <div className="text-white font-medium">{position.size.toFixed(6)} BTC</div>
+            <div className="text-white font-medium">{formatSize(position.size)} {symbol}</div>
           </div>
           <div className="bg-black/30 rounded-lg p-2.5">
             <div className="text-white/40 text-xs mb-1">Entry Price</div>
-            <div className="text-white font-medium">${position.entry_price.toLocaleString()}</div>
+            <div className="text-white font-medium">{formatPrice(position.entry_price)}</div>
           </div>
           <div className="bg-black/30 rounded-lg p-2.5">
             <div className="text-white/40 text-xs mb-1">Mark Price</div>
-            <div className="text-white font-medium">${position.mark_price.toLocaleString()}</div>
+            <div className="text-white font-medium">{formatPrice(position.mark_price)}</div>
           </div>
-          {position.liquidation_price && (
+          {position.liquidation_price && position.liquidation_price > 0 && (
             <div className="bg-black/30 rounded-lg p-2.5">
               <div className="text-white/40 text-xs mb-1">Liq. Price</div>
-              <div className="text-orange-400 font-medium">${position.liquidation_price.toLocaleString()}</div>
+              <div className="text-orange-400 font-medium">{formatPrice(position.liquidation_price)}</div>
             </div>
           )}
         </div>
@@ -446,9 +489,26 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
     if (!backendReady || initialLoading) return;
     const savedSession = localStorage.getItem('valiant_session_id');
     if (savedSession) {
-      addLog('Found saved session, reconnecting...');
-      setSessionId(savedSession);
-      setTimeout(() => connect(savedSession, handleWebSocketMessage, setWsStatus), 500);
+      // Verify session still exists on server before connecting WS
+      fetch(`${API_URL}/api/status/${savedSession}`)
+        .then(res => {
+          if (res.ok) {
+            return res.json().then(data => {
+              addLog('Reconnected to existing session');
+              setSessionId(savedSession);
+              setIsRunning(data.is_running || false);
+              if (data.stats) setStats(data.stats);
+              setTimeout(() => connect(savedSession, handleWebSocketMessage, setWsStatus), 500);
+            });
+          } else {
+            // Session gone (server restarted) — clean up
+            addLog('Previous session expired, ready for new bot');
+            localStorage.removeItem('valiant_session_id');
+          }
+        })
+        .catch(() => {
+          localStorage.removeItem('valiant_session_id');
+        });
     }
   }, [backendReady, initialLoading]);
 
