@@ -104,7 +104,7 @@ function AppContent() {
     <WalletProvider>
       <div className="min-h-screen bg-[#0a0a0a] text-white">
         <Header />
-        <main>
+        <main className="pt-16">
           <Routes>
             <Route path="/" element={<HomePage />} />
             
