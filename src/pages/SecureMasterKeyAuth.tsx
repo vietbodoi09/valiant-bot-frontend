@@ -258,12 +258,10 @@ export default function SecureMasterKeyAuth({ onAuthenticated }: SecureMasterKey
         <div className="text-center mb-8">
           <div className="relative w-20 h-20 mx-auto mb-4">
             <div className="absolute inset-0 bg-orange-500/30 blur-xl rounded-2xl animate-pulse" />
-            <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-2xl shadow-orange-500/30">
-              <Shield className="w-10 h-10 text-white" />
-            </div>
+            <img src="/valbot-logo.png" alt="ValBot" className="relative w-20 h-20 rounded-2xl shadow-2xl shadow-orange-500/30" />
             <div className="absolute -inset-2 rounded-3xl border-2 border-orange-500/30 border-t-orange-500 animate-spin" style={{ animationDuration: '3s' }} />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Valiant Bot</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">ValBot</h1>
           <p className="text-white/50">Secure Private Access</p>
         </div>
 
@@ -518,7 +516,7 @@ request.onsuccess = async (e) => {
         {/* Footer */}
         <div className="text-center mt-6 text-white/30 text-xs">
           <p>Unauthorized access is prohibited</p>
-          <p className="mt-1">© 2024 Valiant Bot</p>
+          <p className="mt-1">© 2025 ValBot</p>
         </div>
       </div>
     </div>
