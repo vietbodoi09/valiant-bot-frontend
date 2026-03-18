@@ -668,6 +668,20 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
         setPositions([]);
         addLog('Bot initialized');
         setTimeout(() => connect(data.session_id, handleWebSocketMessage, setWsStatus), 800);
+      } else if (res.status === 409) {
+        // Bot already running for this wallet — find and reconnect
+        addLog('Bot already running! Reconnecting...');
+        const activeRes = await fetch(`${API_URL}/api/active-session?wallet=${encodeURIComponent(apiKeys.valiant_master_address || '')}`);
+        const activeData = await activeRes.json();
+        if (activeData.session_id) {
+          setSessionId(activeData.session_id);
+          localStorage.setItem('valiant_session_id', activeData.session_id);
+          setIsRunning(true);
+          if (activeData.logs) activeData.logs.forEach((l: string) => addLog(l));
+          setTimeout(() => connect(activeData.session_id, handleWebSocketMessage, setWsStatus), 500);
+        } else {
+          addLog('Could not find running session');
+        }
       } else {
         addLog(`Error: ${data.detail || 'Failed to start'}`);
       }
