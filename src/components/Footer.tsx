@@ -1,4 +1,4 @@
-import { Twitter, MessageCircle, ExternalLink, Activity } from 'lucide-react';
+import { Twitter, MessageCircle, ExternalLink } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -6,9 +6,7 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center">
-              <Activity className="w-4 h-4 text-white" strokeWidth={2.5} />
-            </div>
+            <img src="/valbot-logo.png" alt="ValBot" className="w-7 h-7 rounded-lg" />
             <div className="flex items-baseline gap-0.5">
               <span className="text-white font-bold text-sm">Val</span>
               <span className="text-emerald-400 font-bold text-sm">Bot</span>
@@ -17,10 +15,10 @@ const Footer = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <a href="https://valiant.trade" target="_blank" rel="noopener noreferrer"
+            <a href="https://valiant.trade/trade?af=valbot" target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-1.5 text-white/40 hover:text-emerald-400 transition-colors text-xs">
               <ExternalLink size={13} />
-              valiant.trade
+              valiant.trade (20% off)
             </a>
             <div className="w-px h-4 bg-white/10" />
             <a href="https://x.com/valianttrade" target="_blank" rel="noopener noreferrer"
@@ -34,7 +32,7 @@ const Footer = () => {
           </div>
 
           <p className="text-[11px] text-white/20">
-            &copy; 2026 ValBot
+            &copy; 2025 ValBot
           </p>
         </div>
       </div>
