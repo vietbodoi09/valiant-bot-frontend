@@ -455,6 +455,33 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
 
   useEffect(() => { return () => { disconnect(); }; }, [disconnect]);
 
+  const restoreSession = useCallback((sid: string, data: any) => {
+    setSessionId(sid);
+    setIsRunning(data.is_running || false);
+    if (data.stats) setStats(data.stats);
+    if (data.balances) setBalances(data.balances);
+    if (data.positions) {
+      const restored: Position[] = [];
+      for (const [exchange, pos] of Object.entries(data.positions)) {
+        if (pos && typeof pos === 'object') {
+          const p = pos as any;
+          restored.push({
+            symbol: p.symbol || '', side: p.side || 'long', size: p.size || 0,
+            entry_price: p.entry_price || 0, mark_price: p.mark_price || 0,
+            pnl: p.pnl || 0, pnl_percent: p.pnl_percent || 0,
+            exchange: p.exchange || exchange, leverage: p.leverage || 1,
+            liquidation_price: p.liquidation_price || 0,
+          });
+        }
+      }
+      if (restored.length > 0) setPositions(restored);
+    }
+    if (data.logs && Array.isArray(data.logs)) {
+      data.logs.forEach((log: string) => addLog(log));
+    }
+    setTimeout(() => connect(sid, handleWebSocketMessage, setWsStatus), 500);
+  }, [connect, handleWebSocketMessage, addLog]);
+
   useEffect(() => {
     if (!backendReady || initialLoading) return;
     const savedSession = localStorage.getItem('valiant_session_id');
@@ -464,45 +491,22 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
           if (res.ok) {
             return res.json().then(data => {
               addLog('Reconnected to existing session');
-              setSessionId(savedSession);
-              setIsRunning(data.is_running || false);
-              if (data.stats) setStats(data.stats);
-              if (data.balances) setBalances(data.balances);
-              
-              // Restore positions
-              if (data.positions) {
-                const restored: Position[] = [];
-                for (const [exchange, pos] of Object.entries(data.positions)) {
-                  if (pos && typeof pos === 'object') {
-                    const p = pos as any;
-                    restored.push({
-                      symbol: p.symbol || '',
-                      side: p.side || 'long',
-                      size: p.size || 0,
-                      entry_price: p.entry_price || 0,
-                      mark_price: p.mark_price || 0,
-                      pnl: p.pnl || 0,
-                      pnl_percent: p.pnl_percent || 0,
-                      exchange: p.exchange || exchange,
-                      leverage: p.leverage || 1,
-                      liquidation_price: p.liquidation_price || 0,
-                    });
-                  }
-                }
-                if (restored.length > 0) setPositions(restored);
-              }
-              
-              // Restore recent logs
-              if (data.logs && Array.isArray(data.logs)) {
-                data.logs.forEach((log: string) => addLog(log));
-              }
-              
-              // Connect WS for live updates
-              setTimeout(() => connect(savedSession, handleWebSocketMessage, setWsStatus), 500);
+              restoreSession(savedSession, data);
             });
           } else {
-            addLog('Previous session expired, ready for new bot');
-            localStorage.removeItem('valiant_session_id');
+            // Saved session gone — try finding any active session (server may have restarted with new session IDs)
+            return fetch(`${API_URL}/api/active-session`)
+              .then(r => r.json())
+              .then(data => {
+                if (data.session_id) {
+                  addLog('Found active bot session, reconnecting...');
+                  localStorage.setItem('valiant_session_id', data.session_id);
+                  restoreSession(data.session_id, data);
+                } else {
+                  addLog('No active session found');
+                  localStorage.removeItem('valiant_session_id');
+                }
+              });
           }
         })
         .catch(() => {
