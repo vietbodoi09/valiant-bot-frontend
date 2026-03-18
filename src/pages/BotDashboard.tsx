@@ -437,6 +437,7 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
       case 'state':
         setIsRunning(msg.data.is_running);
         if (msg.data.stats) setStats(msg.data.stats);
+        if (!msg.data.is_running) setPositions([]);  // Clear cards when bot stops
         break;
       case 'position':
         if (msg.data.position) {
@@ -603,6 +604,9 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
               const filtered = prev.filter(p => p.exchange !== msg.data.exchange);
               return [...filtered, { ...pos, exchange: msg.data.exchange }];
             });
+          } else {
+            // Position closed — remove card
+            setPositions(prev => prev.filter(p => p.exchange !== msg.data.exchange));
           }
         }
         else if (msg.type === 'stats') {
@@ -738,9 +742,7 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
         <div className="text-center animate-in fade-in zoom-in duration-500">
           <div className="relative w-28 h-28 mx-auto mb-8">
             <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 animate-pulse opacity-50 blur-xl" />
-            <div className="relative w-28 h-28 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center border border-emerald-400/30 shadow-2xl shadow-emerald-500/30">
-              <Zap className="w-14 h-14 text-white animate-pulse" />
-            </div>
+            <img src="/valbot-logo.png" alt="ValBot" className="relative w-28 h-28 rounded-2xl shadow-2xl shadow-emerald-500/30 border border-emerald-400/30" />
             <div className="absolute -inset-3 rounded-3xl border-2 border-emerald-500/30 border-t-emerald-500 animate-spin" style={{ animationDuration: '2s' }} />
           </div>
           <h1 className="text-4xl font-bold text-white mb-3">ValBot</h1>
