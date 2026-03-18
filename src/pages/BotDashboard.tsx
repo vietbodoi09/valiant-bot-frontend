@@ -459,7 +459,6 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
     if (!backendReady || initialLoading) return;
     const savedSession = localStorage.getItem('valiant_session_id');
     if (savedSession) {
-      // Verify session still exists on server before connecting WS
       fetch(`${API_URL}/api/status/${savedSession}`)
         .then(res => {
           if (res.ok) {
@@ -468,10 +467,35 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
               setSessionId(savedSession);
               setIsRunning(data.is_running || false);
               if (data.stats) setStats(data.stats);
+              if (data.balances) setBalances(data.balances);
+              
+              // Restore positions
+              if (data.positions) {
+                const restored: Position[] = [];
+                for (const [exchange, pos] of Object.entries(data.positions)) {
+                  if (pos && typeof pos === 'object') {
+                    const p = pos as any;
+                    restored.push({
+                      symbol: p.symbol || '',
+                      side: p.side || 'long',
+                      size: p.size || 0,
+                      entry_price: p.entry_price || 0,
+                      mark_price: p.mark_price || 0,
+                      pnl: p.pnl || 0,
+                      pnl_percent: p.pnl_percent || 0,
+                      exchange: p.exchange || exchange,
+                      leverage: p.leverage || 1,
+                      liquidation_price: p.liquidation_price || 0,
+                    });
+                  }
+                }
+                if (restored.length > 0) setPositions(restored);
+              }
+              
+              // Connect WS for live updates
               setTimeout(() => connect(savedSession, handleWebSocketMessage, setWsStatus), 500);
             });
           } else {
-            // Session gone (server restarted) — clean up
             addLog('Previous session expired, ready for new bot');
             localStorage.removeItem('valiant_session_id');
           }
