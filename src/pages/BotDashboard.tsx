@@ -1146,28 +1146,57 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                     <div className="mt-4 p-4 rounded-xl bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-500/20">
                       <div className="flex items-center gap-2 mb-3">
                         <Info className="w-4 h-4 text-cyan-400" />
-                        <h4 className="text-cyan-300 font-medium text-sm">How to Get Your Lighter Account ID</h4>
+                        <h4 className="text-cyan-300 font-medium text-sm">How to Get Your Lighter API Key</h4>
                       </div>
-                      <ol className="space-y-2 text-xs text-white/70">
+                      
+                      {/* Part A: Create API Key */}
+                      <p className="text-[10px] text-cyan-400/70 uppercase tracking-wider font-semibold mb-2">Part A — Create API Key</p>
+                      <ol className="space-y-2 text-xs text-white/70 mb-4">
                         <li className="flex items-start gap-2">
                           <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px] font-bold">1</span>
                           <span>Go to <a href="https://lighter.xyz/" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:text-cyan-300 underline inline-flex items-center gap-1">lighter.xyz <ExternalLink className="w-3 h-3" /></a> and connect your wallet</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px] font-bold">2</span>
-                          <span>Press <kbd className="px-1.5 py-0.5 bg-white/10 rounded text-[10px]">F12</kbd> → <strong>Network</strong> tab</span>
+                          <span>Click your wallet address (top right) → select <strong>API Keys</strong></span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px] font-bold">3</span>
-                          <span>Refresh page (F5) and wait for it to load</span>
+                          <span>Click <strong>"Create API Key"</strong> → set permissions to <strong>Trade</strong> → confirm</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px] font-bold">4</span>
-                          <span>Filter by "account" in the Network search box</span>
+                          <span>Copy the <strong>Private Key</strong> shown (save it — won't be shown again!)</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px] font-bold">5</span>
-                          <span>Look for URL containing <code className="bg-white/10 px-1 rounded">account_index=</code> or <code className="bg-white/10 px-1 rounded">account?by=</code></span>
+                          <span>Note the <strong>API Key Index</strong> number (usually 2) — enter it in the field above</span>
+                        </li>
+                      </ol>
+                      <div className="p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20 mb-4">
+                        <p className="text-[10px] text-cyan-300">
+                          <strong>Lighter API Key format:</strong> Paste the private key as JSON: <code className="bg-black/40 px-1 rounded">{'{"2": "your_private_key_hex"}'}</code> where <code className="bg-black/40 px-1 rounded">2</code> is your API Key Index.
+                        </p>
+                      </div>
+
+                      {/* Part B: Find Account ID */}
+                      <p className="text-[10px] text-cyan-400/70 uppercase tracking-wider font-semibold mb-2">Part B — Find Your Account ID</p>
+                      <ol className="space-y-2 text-xs text-white/70">
+                        <li className="flex items-start gap-2">
+                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px] font-bold">1</span>
+                          <span>On lighter.xyz, press <kbd className="px-1.5 py-0.5 bg-white/10 rounded text-[10px]">F12</kbd> → <strong>Network</strong> tab</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px] font-bold">2</span>
+                          <span>Refresh page (F5) and wait for it to load</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px] font-bold">3</span>
+                          <span>Filter by <code className="bg-white/10 px-1 rounded">account</code> in the Network search box</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px] font-bold">4</span>
+                          <span>Look for URL containing <code className="bg-white/10 px-1 rounded">account_index=</code></span>
                         </li>
                       </ol>
                       <div className="mt-3 p-2 rounded bg-black/40 border border-cyan-500/20">
