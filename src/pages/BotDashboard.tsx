@@ -732,43 +732,27 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
           <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-emerald-600/5 rounded-full blur-[100px]" />
         </div>
 
-        {/* Status Bar - Only status/session/logout, no duplicate title */}
-        <div className="relative border-b border-white/5 bg-black/40 backdrop-blur-xl">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-12 flex items-center justify-end gap-3">
-            <Badge variant={wsStatus === 'connected' ? 'default' : 'secondary'} 
-              className={cn('px-3 py-1',
-                wsStatus === 'connected' && 'bg-green-500/20 text-green-400 border-green-500/30',
-                wsStatus === 'connecting' && 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-                wsStatus === 'disconnected' && 'bg-gray-500/20 text-gray-400')}>
-              <span className={cn('w-2 h-2 rounded-full mr-2', 
-                wsStatus === 'connected' ? 'bg-green-400 animate-pulse' : 
-                wsStatus === 'connecting' ? 'bg-yellow-400 animate-pulse' : 'bg-gray-400')} />
-              {wsStatus === 'connected' ? 'Live' : wsStatus === 'connecting' ? 'Connecting' : 'Offline'}
-            </Badge>
-            {sessionId && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Badge variant="outline" onClick={copySession}
-                    className="border-white/10 text-white/60 font-mono text-xs cursor-pointer hover:border-emerald-500/50 transition-colors">
-                    {sessionId} <Copy className="w-3 h-3 ml-2" />
-                  </Badge>
-                </TooltipTrigger>
-                <TooltipContent><p>Click to copy session ID</p></TooltipContent>
-              </Tooltip>
-            )}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={onLogout}
-                  className="text-white/40 hover:text-red-400 hover:bg-red-500/10"
-                >
-                  <LogOut className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent><p>Logout</p></TooltipContent>
-            </Tooltip>
+        {/* Status Bar */}
+        <div className="relative border-b border-white/5 bg-black/20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-10 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs text-white/40">
+              <span className={cn('w-1.5 h-1.5 rounded-full', 
+                wsStatus === 'connected' ? 'bg-emerald-400 animate-pulse' : 
+                wsStatus === 'connecting' ? 'bg-yellow-400 animate-pulse' : 'bg-white/20')} />
+              {wsStatus === 'connected' ? 'Live' : wsStatus === 'connecting' ? 'Connecting...' : 'Offline'}
+            </div>
+            <div className="flex items-center gap-2">
+              {sessionId && (
+                <button onClick={copySession}
+                  className="flex items-center gap-1.5 text-[10px] text-white/30 font-mono hover:text-white/60 transition-colors">
+                  {sessionId} <Copy className="w-3 h-3" />
+                </button>
+              )}
+              <button onClick={onLogout}
+                className="text-white/30 hover:text-red-400 transition-colors p-1">
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         </div>
 
