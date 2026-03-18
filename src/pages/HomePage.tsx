@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Activity, ArrowRight, Shield, Zap, BarChart3, TrendingUp, DollarSign, 
+import { ArrowRight, Shield, Zap, BarChart3, TrendingUp, DollarSign, 
   Clock, RefreshCw, Scan, Bot, ChevronRight, ExternalLink, Check, X } from 'lucide-react';
 
 const AFFILIATE_LINK = "https://valiant.trade/trade?af=valbot";
@@ -47,9 +47,7 @@ export default function HomePage() {
         <div className="max-w-4xl mx-auto text-center">
           <div className="relative w-20 h-20 mx-auto mb-10">
             <div className="absolute inset-0 bg-emerald-500/20 blur-2xl rounded-2xl animate-pulse" />
-            <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-400 via-emerald-500 to-teal-600 flex items-center justify-center shadow-2xl shadow-emerald-500/30">
-              <Activity className="w-10 h-10 text-white" strokeWidth={2} />
-            </div>
+            <img src="/valbot-logo.png" alt="ValBot" className="relative w-20 h-20 rounded-2xl shadow-2xl shadow-emerald-500/30" />
           </div>
           <h1 className="text-6xl md:text-7xl font-black tracking-tight mb-6">
             <span className="text-white">Val</span>
