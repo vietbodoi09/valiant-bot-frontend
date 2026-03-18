@@ -912,7 +912,7 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                       </div>
                     </div>
 
-                    {/* Agent Key Guide - Always Visible */}
+                    {/* Agent Key Guide */}
                     <div className="mt-4 p-4 rounded-xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20">
                       <div className="flex items-center gap-2 mb-3">
                         <Info className="w-4 h-4 text-emerald-400" />
@@ -933,39 +933,32 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px] font-bold">4</span>
-                          <span>Copy & paste the code below, then press Enter:</span>
+                          <span>Click the Copy button below, paste in Console, then press Enter:</span>
                         </li>
                       </ol>
-                      <div className="mt-3 p-3 rounded-lg bg-black/60 border border-white/10 overflow-x-auto">
-                        <code className="text-[10px] text-green-400 font-mono whitespace-pre">{`const request = indexedDB.open('valiant-agent-keys');
-request.onsuccess = async (e) => {
-  const db = e.target.result;
-  const tx = db.transaction('encryption-keys', 'readonly');
-  const store = tx.objectStore('encryption-keys');
-  const walletAddress = 'YOUR_WALLET_ADDRESS';
-  const getKey = store.get(walletAddress);
-  getKey.onsuccess = async () => {
-    const cryptoKey = getKey.result;
-    const encryptedB64 = localStorage.getItem('valiant:agent:' + walletAddress);
-    const encryptedBytes = Uint8Array.from(atob(encryptedB64), c => c.charCodeAt(0));
-    const iv = encryptedBytes.slice(0, 12);
-    const ciphertext = encryptedBytes.slice(12);
-    try {
-      const decrypted = await crypto.subtle.decrypt(
-        { name: 'AES-GCM', iv: iv }, cryptoKey, ciphertext
-      );
-      console.log('KEY:', new TextDecoder().decode(decrypted));
-    } catch(err) { console.log('Error:', err); }
-  };
-};`}</code>
+                      <div className="mt-3 relative group">
+                        <button
+                          onClick={() => {
+                            const code = `const r=indexedDB.open('valiant-agent-keys');r.onsuccess=async e=>{const db=e.target.result;try{const tx=db.transaction('encryption-keys','readonly');const s=tx.objectStore('encryption-keys');const g=s.getAll();g.onsuccess=async()=>{for(const entry of g.result){const keys=Object.keys(localStorage).filter(k=>k.startsWith('valiant:agent:'));for(const lsKey of keys){try{const addr=lsKey.replace('valiant:agent:','');const enc=localStorage.getItem(lsKey);const bytes=Uint8Array.from(atob(enc),c=>c.charCodeAt(0));const iv=bytes.slice(0,12);const ct=bytes.slice(12);const key=entry.key||entry;const dec=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,ct);console.log('WALLET:',addr);console.log('AGENT KEY:',new TextDecoder().decode(dec))}catch(e){}}}};}catch(e){console.log('No encryption-keys store, trying direct...');const keys=Object.keys(localStorage).filter(k=>k.startsWith('valiant:agent:'));keys.forEach(k=>console.log(k,localStorage.getItem(k)))}};`;
+                            navigator.clipboard.writeText(code);
+                            const btn = document.getElementById('copy-code-btn');
+                            if (btn) { btn.textContent = '✓ Copied!'; setTimeout(() => { btn.textContent = 'Copy Code'; }, 2000); }
+                          }}
+                          id="copy-code-btn"
+                          className="w-full py-2.5 px-4 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-medium hover:bg-emerald-500/30 transition-colors flex items-center justify-center gap-2"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                          Copy Code
+                        </button>
                       </div>
-                      <p className="mt-2 text-[10px] text-white/50">
-                        Replace <code className="text-emerald-400">YOUR_WALLET_ADDRESS</code> with your actual wallet address
-                      </p>
                       <div className="mt-3 pt-3 border-t border-emerald-500/20">
-                        <p className="text-[10px] text-white/50 flex items-center gap-1">
+                        <p className="text-[10px] text-white/40 leading-relaxed">
+                          The script auto-detects your wallet and extracts the agent key from browser storage. 
+                          Look for <code className="text-emerald-400">AGENT KEY:</code> in the console output.
+                        </p>
+                        <p className="text-[10px] text-white/30 flex items-center gap-1 mt-2">
                           <Shield className="w-3 h-3" />
-                          Your keys are stored locally in your browser and never sent to our servers.
+                          Keys are stored locally in your browser and never sent to our servers.
                         </p>
                       </div>
                     </div>
