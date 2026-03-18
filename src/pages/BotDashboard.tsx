@@ -437,7 +437,27 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
       case 'state':
         setIsRunning(msg.data.is_running);
         if (msg.data.stats) setStats(msg.data.stats);
-        if (!msg.data.is_running) setPositions([]);  // Clear cards when bot stops
+        if (msg.data.balances) setBalances(msg.data.balances);
+        if (msg.data.cycle_history) setCycleHistory(msg.data.cycle_history);
+        // Restore positions from state
+        if (msg.data.positions && msg.data.is_running) {
+          const restored: Position[] = [];
+          for (const [exchange, pos] of Object.entries(msg.data.positions)) {
+            if (pos && typeof pos === 'object') {
+              const p = pos as any;
+              restored.push({
+                symbol: p.symbol || '', side: p.side || 'long', size: p.size || 0,
+                entry_price: p.entry_price || 0, mark_price: p.mark_price || 0,
+                pnl: p.pnl || 0, pnl_percent: p.pnl_percent || 0,
+                exchange: p.exchange || exchange, leverage: p.leverage || 1,
+                liquidation_price: p.liquidation_price || 0,
+              });
+            }
+          }
+          if (restored.length > 0) setPositions(restored);
+        } else if (!msg.data.is_running) {
+          setPositions([]);
+        }
         break;
       case 'position':
         if (msg.data.position) {
@@ -595,7 +615,26 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
         else if (msg.type === 'state') {
           setIsRunning(msg.data.is_running);
           setStats(msg.data.stats || { trades: 0, volume: 0, pnl: 0 });
+          if (msg.data.balances) setBalances(msg.data.balances);
           if (msg.data.cycle_history) setCycleHistory(msg.data.cycle_history);
+          if (msg.data.positions && msg.data.is_running) {
+            const restored: Position[] = [];
+            for (const [exchange, pos] of Object.entries(msg.data.positions)) {
+              if (pos && typeof pos === 'object') {
+                const p = pos as any;
+                restored.push({
+                  symbol: p.symbol || '', side: p.side || 'long', size: p.size || 0,
+                  entry_price: p.entry_price || 0, mark_price: p.mark_price || 0,
+                  pnl: p.pnl || 0, pnl_percent: p.pnl_percent || 0,
+                  exchange: p.exchange || exchange, leverage: p.leverage || 1,
+                  liquidation_price: p.liquidation_price || 0,
+                });
+              }
+            }
+            if (restored.length > 0) setPositions(restored);
+          } else if (!msg.data.is_running) {
+            setPositions([]);
+          }
         }
         else if (msg.type === 'position') {
           const pos = msg.data.position;
