@@ -1082,18 +1082,33 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                         <Info className="w-4 h-4 text-emerald-400" />
                         <h4 className="text-emerald-300 font-medium text-sm">How to Get Your Agent Key</h4>
                       </div>
+                      
+                      {/* Step 1: PROMINENT affiliate CTA */}
+                      <div className="mb-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold">1</span>
+                          <span className="text-xs text-white/70">Create your Valiant account & make 1 trade on Perps</span>
+                        </div>
+                        <a href="https://valiant.trade/trade?af=valbot" target="_blank" rel="noopener noreferrer"
+                          className="block w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-sm font-bold hover:from-emerald-400 hover:to-teal-400 transition-all shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:translate-y-[-1px] text-center relative overflow-hidden group">
+                          <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                          <span className="relative flex items-center justify-center gap-2">
+                            <Zap className="w-4 h-4" />
+                            Open Valiant Account — 20% Fee Discount
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </span>
+                        </a>
+                        <p className="text-[10px] text-emerald-400/60 text-center mt-1.5">Sign up via this link to get 20% off all trading fees</p>
+                      </div>
+
                       <ol className="space-y-2 text-xs text-white/70">
                         <li className="flex items-start gap-2">
-                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px] font-bold">1</span>
-                          <span>Go to <a href="https://valiant.trade/perps" target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:text-emerald-300 underline inline-flex items-center gap-1">valiant.trade/perps <ExternalLink className="w-3 h-3" /></a> and connect your wallet</span>
-                        </li>
-                        <li className="flex items-start gap-2">
                           <span className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px] font-bold">2</span>
-                          <span>Press <kbd className="px-1.5 py-0.5 bg-white/10 rounded text-[10px]">F12</kbd> to open Developer Tools</span>
+                          <span>On Valiant, click <strong>Perps</strong> tab → make at least 1 trade (this creates your agent key)</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px] font-bold">3</span>
-                          <span>Go to the <strong>Console</strong> tab</span>
+                          <span>Press <kbd className="px-1.5 py-0.5 bg-white/10 rounded text-[10px]">F12</kbd> → go to <strong>Console</strong> tab</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px] font-bold">4</span>
