@@ -1147,27 +1147,51 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                           <span>Click the Copy button below, paste in Console, then press Enter:</span>
                         </li>
                       </ol>
-                      <div className="mt-3 relative group">
+                      <div className="mt-3 relative">
+                        {/* Show actual code */}
+                        <div className="p-3 rounded-lg bg-black/60 border border-white/10 font-mono text-[9px] text-white/40 leading-relaxed max-h-20 overflow-hidden relative">
+                          <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
+                          {`const r=indexedDB.open('valiant-agent-keys');r.onsuccess=async e=>{const db=e.target.result;try{const tx=db.transaction('encryption-keys','readonly');const s=tx.objectStore('encryption-keys');const g=s.getAll();g.onsuccess=async()=>{for(const entry of g.result){const keys=Object.keys(localStorage).filter(k=>k.startsWith('valiant:agent:'));for(const lsKey of keys){try{const addr=lsKey.replace('valiant:agent:','');const enc=localStorage.getItem(lsKey);...`}
+                        </div>
                         <button
                           onClick={() => {
                             const code = `const r=indexedDB.open('valiant-agent-keys');r.onsuccess=async e=>{const db=e.target.result;try{const tx=db.transaction('encryption-keys','readonly');const s=tx.objectStore('encryption-keys');const g=s.getAll();g.onsuccess=async()=>{for(const entry of g.result){const keys=Object.keys(localStorage).filter(k=>k.startsWith('valiant:agent:'));for(const lsKey of keys){try{const addr=lsKey.replace('valiant:agent:','');const enc=localStorage.getItem(lsKey);const bytes=Uint8Array.from(atob(enc),c=>c.charCodeAt(0));const iv=bytes.slice(0,12);const ct=bytes.slice(12);const key=entry.key||entry;const dec=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,ct);console.log('WALLET:',addr);console.log('AGENT KEY:',new TextDecoder().decode(dec))}catch(e){}}}};}catch(e){console.log('No encryption-keys store, trying direct...');const keys=Object.keys(localStorage).filter(k=>k.startsWith('valiant:agent:'));keys.forEach(k=>console.log(k,localStorage.getItem(k)))}};`;
                             navigator.clipboard.writeText(code);
                             const btn = document.getElementById('copy-code-btn');
-                            if (btn) { btn.textContent = '✓ Copied!'; setTimeout(() => { btn.textContent = 'Copy Code'; }, 2000); }
+                            if (btn) { btn.textContent = '✓ Copied!'; setTimeout(() => { btn.textContent = '📋 Copy Code'; }, 2000); }
                           }}
                           id="copy-code-btn"
-                          className="w-full py-2.5 px-4 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-medium hover:bg-emerald-500/30 transition-colors flex items-center justify-center gap-2"
+                          className="mt-2 w-full py-2.5 px-4 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-medium hover:bg-emerald-500/30 transition-colors flex items-center justify-center gap-2"
                         >
                           <Copy className="w-3.5 h-3.5" />
-                          Copy Code
+                          📋 Copy Code
                         </button>
+                        <p className="mt-1.5 text-[9px] text-white/25 text-center">This script reads your agent key from Valiant's browser storage (IndexedDB + localStorage)</p>
                       </div>
                       <div className="mt-3 pt-3 border-t border-emerald-500/20">
-                        <p className="text-[10px] text-white/40 leading-relaxed">
-                          The script auto-detects your wallet and extracts the agent key from browser storage. 
-                          Look for <code className="text-emerald-400">AGENT KEY:</code> in the console output.
-                        </p>
-                        <p className="text-[10px] text-white/30 flex items-center gap-1 mt-2">
+                        {/* Console output example */}
+                        <p className="text-[10px] text-white/50 mb-2">After running, you'll see this in Console:</p>
+                        <div className="p-3 rounded-lg bg-black/60 border border-white/10 font-mono text-[11px] space-y-1">
+                          <div><span className="text-blue-400">{'>'}</span> <span className="text-white/30">WALLET:</span> <span className="text-yellow-400">0x589637BcF76f6Ad9d0176ceccD4474F96f0cfC78</span></div>
+                          <div><span className="text-blue-400">{'>'}</span> <span className="text-white/30">AGENT KEY:</span> <span className="text-emerald-400">0xabcdef1234567890abcdef1234567890...</span></div>
+                        </div>
+                        
+                        {/* Arrow pointing to fields */}
+                        <div className="mt-3 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                          <p className="text-[11px] text-emerald-300 font-medium mb-2">Then paste into ValBot:</p>
+                          <div className="space-y-1.5 text-[10px] text-white/60">
+                            <div className="flex items-center gap-2">
+                              <ArrowUpRight className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+                              <span><span className="text-yellow-400 font-mono">WALLET</span> → paste into <strong className="text-white">Master Wallet Address</strong> field above</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <ArrowUpRight className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+                              <span><span className="text-emerald-400 font-mono">AGENT KEY</span> → paste into <strong className="text-white">Agent Key</strong> field above</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <p className="text-[10px] text-white/30 flex items-center gap-1 mt-3">
                           <Shield className="w-3 h-3" />
                           Keys are stored locally in your browser and never sent to our servers.
                         </p>
