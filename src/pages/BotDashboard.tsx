@@ -492,6 +492,11 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                 if (restored.length > 0) setPositions(restored);
               }
               
+              // Restore recent logs
+              if (data.logs && Array.isArray(data.logs)) {
+                data.logs.forEach((log: string) => addLog(log));
+              }
+              
               // Connect WS for live updates
               setTimeout(() => connect(savedSession, handleWebSocketMessage, setWsStatus), 500);
             });
