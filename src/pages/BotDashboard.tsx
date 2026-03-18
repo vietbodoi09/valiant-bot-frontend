@@ -494,8 +494,10 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
               restoreSession(savedSession, data);
             });
           } else {
-            // Saved session gone — try finding any active session (server may have restarted with new session IDs)
-            return fetch(`${API_URL}/api/active-session`)
+            // Saved session gone — try finding active session for this wallet
+            const savedKeys = localStorage.getItem('valiant_api_keys');
+            const wallet = savedKeys ? (JSON.parse(savedKeys).valiant_master_address || '') : '';
+            return fetch(`${API_URL}/api/active-session?wallet=${encodeURIComponent(wallet)}`)
               .then(r => r.json())
               .then(data => {
                 if (data.session_id) {
