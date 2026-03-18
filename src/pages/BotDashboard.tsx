@@ -932,6 +932,19 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                 )}
               </div>
 
+              {/* Keep tab open warning */}
+              {isRunning && (
+                <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-yellow-500/10 border border-yellow-500/20">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-yellow-500/20 flex items-center justify-center">
+                    <AlertCircle className="w-4 h-4 text-yellow-400" />
+                  </div>
+                  <div>
+                    <p className="text-yellow-300 text-xs font-medium">Keep this tab open while bot is running</p>
+                    <p className="text-white/30 text-[10px] mt-0.5">Bot runs on our server, but this tab is needed for live updates. You can minimize the tab — don't close it.</p>
+                  </div>
+                </div>
+              )}
+
               {/* Cycle History */}
               {cycleHistory.length > 0 && (
                 <Card className="bg-black/40 backdrop-blur border-white/5">
