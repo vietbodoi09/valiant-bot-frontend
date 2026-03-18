@@ -881,6 +881,38 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                 </div>
               )}
 
+              {/* Affiliate CTA — shows when bot not running */}
+              {!isRunning && (
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600/20 via-teal-500/20 to-emerald-600/20 border border-emerald-500/30 p-5">
+                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-500/5 to-emerald-500/0 animate-pulse" />
+                  <div className="relative">
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                        <DollarSign className="w-6 h-6 text-emerald-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-white font-bold text-base mb-1">Save 20% on Trading Fees</h3>
+                        <p className="text-white/50 text-xs mb-3">
+                          ValBot uses limit orders (maker) so your fees are already minimal. 
+                          Sign up via our link to get an <span className="text-emerald-400 font-semibold">additional 20% discount</span> — 
+                          your effective fee becomes almost zero.
+                        </p>
+                        <div className="flex items-center gap-3">
+                          <a href="https://valiant.trade/trade?af=valbot" target="_blank" rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-sm font-bold rounded-lg shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:translate-y-[-1px] transition-all relative overflow-hidden group">
+                            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                            <Zap className="w-4 h-4 relative" />
+                            <span className="relative">Create Account — 20% Off</span>
+                            <ExternalLink className="w-3.5 h-3.5 relative" />
+                          </a>
+                          <span className="text-[10px] text-white/30">Required for Hyperliquid trading</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Action Buttons */}
               <div className="flex flex-wrap gap-3">
                 {!isRunning ? (
