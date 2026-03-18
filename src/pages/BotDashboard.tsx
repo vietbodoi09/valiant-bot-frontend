@@ -38,7 +38,30 @@ interface Stats {
   total_trades: number;
   total_volume: number;
   total_pnl: number;
+  total_fees?: number;
   start_time?: string;
+}
+
+interface CycleReport {
+  cycle: number;
+  entry_time: string;
+  exit_time: string;
+  hold_minutes: number;
+  hl_side: string;
+  lighter_side: string;
+  size_usd: number;
+  leverage: number;
+  entry_price: number;
+  exit_price: number;
+  hl_entry: number;
+  lighter_entry: number;
+  hl_funding: number;
+  lighter_funding: number;
+  hl_pnl: number;
+  lighter_pnl: number;
+  net_pnl: number;
+  fee_hl: number;
+  close_reason: string;
 }
 
 interface LogEntry {
@@ -337,6 +360,7 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
   const [showKeys, setShowKeys] = useState(false);
   const [positions, setPositions] = useState<Position[]>([]);
   const [stats, setStats] = useState<Stats>({ total_trades: 0, total_volume: 0, total_pnl: 0 });
+  const [cycleHistory, setCycleHistory] = useState<CycleReport[]>([]);
   const [balances, setBalances] = useState({ hyperliquid: 0, lighter: 0 });
   const [initialLoading, setInitialLoading] = useState(true);
   const [backendReady, setBackendReady] = useState(false);
@@ -432,6 +456,7 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
         break;
       case 'stats': if (msg.data) setStats(msg.data); break;
       case 'balances': if (msg.data) setBalances(msg.data); break;
+      case 'cycle_history': if (msg.data) setCycleHistory(msg.data); break;
       case 'ping': send({ type: 'pong' }); break;
     }
   }, [addLog, send]);
@@ -569,6 +594,7 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
         else if (msg.type === 'state') {
           setIsRunning(msg.data.is_running);
           setStats(msg.data.stats || { trades: 0, volume: 0, pnl: 0 });
+          if (msg.data.cycle_history) setCycleHistory(msg.data.cycle_history);
         }
         else if (msg.type === 'position') {
           const pos = msg.data.position;
@@ -584,6 +610,9 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
         }
         else if (msg.type === 'balances') {
           if (msg.data) setBalances(msg.data);
+        }
+        else if (msg.type === 'cycle_history') {
+          if (msg.data) setCycleHistory(msg.data);
         }
         else if (msg.type === 'ping') {
           ws.send(JSON.stringify({ type: 'pong' }));
@@ -854,6 +883,125 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                   </Button>
                 )}
               </div>
+
+              {/* Cycle History */}
+              {cycleHistory.length > 0 && (
+                <Card className="bg-black/40 backdrop-blur border-white/5">
+                  <CardContent className="p-5">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <BarChart3 className="w-4 h-4 text-emerald-400" />
+                        <span className="text-sm font-medium text-white">Cycle History</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-white/40">{cycleHistory.length}</span>
+                      </div>
+                      <div className="flex items-center gap-4 text-xs">
+                        <span className="text-white/40">
+                          Total Fee: <span className={`font-mono ${(stats.total_fees || 0) > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
+                            ${(stats.total_fees || cycleHistory.reduce((s, c) => s + c.fee_hl, 0)).toFixed(4)}
+                          </span>
+                        </span>
+                        <span className="text-white/40">
+                          Net P&L: <span className={`font-mono font-semibold ${
+                            cycleHistory.reduce((s, c) => s + c.net_pnl - c.fee_hl, 0) >= 0 ? 'text-emerald-400' : 'text-red-400'
+                          }`}>
+                            ${cycleHistory.reduce((s, c) => s + c.net_pnl - c.fee_hl, 0).toFixed(4)}
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-xs">
+                        <thead>
+                          <tr className="border-b border-white/5 text-white/30">
+                            <th className="text-left py-2 px-2 font-medium">#</th>
+                            <th className="text-left py-2 px-2 font-medium">Time</th>
+                            <th className="text-left py-2 px-2 font-medium">Side</th>
+                            <th className="text-right py-2 px-2 font-medium">Size</th>
+                            <th className="text-right py-2 px-2 font-medium">Entry</th>
+                            <th className="text-right py-2 px-2 font-medium">Exit</th>
+                            <th className="text-right py-2 px-2 font-medium">HL PnL</th>
+                            <th className="text-right py-2 px-2 font-medium">LT PnL</th>
+                            <th className="text-right py-2 px-2 font-medium">Fee</th>
+                            <th className="text-right py-2 px-2 font-medium">Net</th>
+                            <th className="text-right py-2 px-2 font-medium">Hold</th>
+                            <th className="text-left py-2 px-2 font-medium">Reason</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {cycleHistory.map((c, i) => {
+                            const netProfit = c.net_pnl - c.fee_hl;
+                            return (
+                              <tr key={i} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
+                                <td className="py-2.5 px-2 text-white/50 font-mono">{c.cycle}</td>
+                                <td className="py-2.5 px-2 text-white/40">
+                                  <div>{c.entry_time?.split(' ')[1] || c.entry_time}</div>
+                                </td>
+                                <td className="py-2.5 px-2">
+                                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                                    c.hl_side === 'short' 
+                                      ? 'bg-red-500/20 text-red-400' 
+                                      : 'bg-emerald-500/20 text-emerald-400'
+                                  }`}>
+                                    HL {c.hl_side?.toUpperCase()}
+                                  </span>
+                                </td>
+                                <td className="py-2.5 px-2 text-right text-white/60 font-mono">${c.size_usd}</td>
+                                <td className="py-2.5 px-2 text-right text-white/50 font-mono">${c.entry_price}</td>
+                                <td className="py-2.5 px-2 text-right text-white/50 font-mono">${c.exit_price}</td>
+                                <td className={`py-2.5 px-2 text-right font-mono ${c.hl_pnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                  ${c.hl_pnl?.toFixed(4)}
+                                </td>
+                                <td className={`py-2.5 px-2 text-right font-mono ${c.lighter_pnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                  ${c.lighter_pnl?.toFixed(4)}
+                                </td>
+                                <td className="py-2.5 px-2 text-right font-mono text-orange-400/80">
+                                  -${c.fee_hl?.toFixed(4)}
+                                </td>
+                                <td className={`py-2.5 px-2 text-right font-mono font-semibold ${netProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                  {netProfit >= 0 ? '+' : ''}${netProfit.toFixed(4)}
+                                </td>
+                                <td className="py-2.5 px-2 text-right text-white/30 font-mono">
+                                  {c.hold_minutes >= 60 ? `${(c.hold_minutes / 60).toFixed(1)}h` : `${c.hold_minutes}m`}
+                                </td>
+                                <td className="py-2.5 px-2 text-white/30 text-[10px]">{c.close_reason}</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                        {/* Summary row */}
+                        <tfoot>
+                          <tr className="border-t border-white/10 bg-white/[0.02]">
+                            <td colSpan={6} className="py-2.5 px-2 text-white/50 font-medium">Total ({cycleHistory.length} cycles)</td>
+                            <td className={`py-2.5 px-2 text-right font-mono font-semibold ${
+                              cycleHistory.reduce((s, c) => s + c.hl_pnl, 0) >= 0 ? 'text-emerald-400' : 'text-red-400'
+                            }`}>
+                              ${cycleHistory.reduce((s, c) => s + c.hl_pnl, 0).toFixed(4)}
+                            </td>
+                            <td className={`py-2.5 px-2 text-right font-mono font-semibold ${
+                              cycleHistory.reduce((s, c) => s + c.lighter_pnl, 0) >= 0 ? 'text-emerald-400' : 'text-red-400'
+                            }`}>
+                              ${cycleHistory.reduce((s, c) => s + c.lighter_pnl, 0).toFixed(4)}
+                            </td>
+                            <td className="py-2.5 px-2 text-right font-mono font-semibold text-orange-400">
+                              -${cycleHistory.reduce((s, c) => s + c.fee_hl, 0).toFixed(4)}
+                            </td>
+                            <td className={`py-2.5 px-2 text-right font-mono font-bold ${
+                              cycleHistory.reduce((s, c) => s + c.net_pnl - c.fee_hl, 0) >= 0 ? 'text-emerald-400' : 'text-red-400'
+                            }`}>
+                              {cycleHistory.reduce((s, c) => s + c.net_pnl - c.fee_hl, 0) >= 0 ? '+' : ''}
+                              ${cycleHistory.reduce((s, c) => s + c.net_pnl - c.fee_hl, 0).toFixed(4)}
+                            </td>
+                            <td className="py-2.5 px-2 text-right text-white/30 font-mono">
+                              {(cycleHistory.reduce((s, c) => s + c.hold_minutes, 0) / 60).toFixed(1)}h
+                            </td>
+                            <td></td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Live Logs - Always visible */}
               <Card className="bg-black/40 backdrop-blur border-white/5">
