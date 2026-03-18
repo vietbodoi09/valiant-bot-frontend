@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { Activity, ArrowRight, Shield, Zap, BarChart3, TrendingUp, DollarSign, 
   Clock, RefreshCw, Scan, Bot, ChevronRight, ExternalLink, Check, X } from 'lucide-react';
 
-const AFFILIATE_LINK = "https://app.valiant.trade/perps?ref=valbot";
+const AFFILIATE_LINK = "https://valiant.trade/trade?af=valbot";
 
 function FeeCompare() {
   const rows = [
