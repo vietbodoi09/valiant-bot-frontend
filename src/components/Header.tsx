@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Shield, Scan, Bot, Home, Activity } from 'lucide-react';
+import { Menu, X, Shield, Scan, Bot, Home } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 const Header = () => {
@@ -33,9 +33,7 @@ const Header = () => {
           <Link to="/" className="flex items-center gap-2.5 group">
             <div className="relative">
               <div className="absolute inset-0 bg-emerald-400/30 blur-lg rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <div className="relative w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-400 via-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                <Activity className="w-5 h-5 text-white" strokeWidth={2.5} />
-              </div>
+              <img src="/valbot-logo.png" alt="ValBot" className="relative w-9 h-9 rounded-lg shadow-lg shadow-emerald-500/20" />
             </div>
             <div className="flex items-baseline gap-0.5">
               <span className="text-white font-bold text-lg tracking-tight">Val</span>
