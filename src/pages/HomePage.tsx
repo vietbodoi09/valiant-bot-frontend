@@ -43,7 +43,7 @@ export default function HomePage() {
       </div>
 
       {/* HERO */}
-      <div className="relative pt-32 pb-16 px-4">
+      <div className="relative pt-16 pb-16 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <div className="relative w-20 h-20 mx-auto mb-10">
             <div className="absolute inset-0 bg-emerald-500/20 blur-2xl rounded-2xl animate-pulse" />
