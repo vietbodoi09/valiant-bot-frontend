@@ -1002,9 +1002,9 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                         </span>
                         <span className="text-white/40">
                           Net P&L: <span className={`font-mono font-semibold ${
-                            cycleHistory.reduce((s, c) => s + c.net_pnl - c.fee_hl, 0) >= 0 ? 'text-emerald-400' : 'text-red-400'
+                            cycleHistory.reduce((s, c) => s + c.net_pnl, 0) >= 0 ? 'text-emerald-400' : 'text-red-400'
                           }`}>
-                            ${cycleHistory.reduce((s, c) => s + c.net_pnl - c.fee_hl, 0).toFixed(4)}
+                            ${cycleHistory.reduce((s, c) => s + c.net_pnl, 0).toFixed(4)}
                           </span>
                         </span>
                       </div>
@@ -1029,7 +1029,7 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                         </thead>
                         <tbody>
                           {cycleHistory.map((c, i) => {
-                            const netProfit = c.net_pnl - c.fee_hl;
+                            const netProfit = c.net_pnl;
                             return (
                               <tr key={i} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
                                 <td className="py-2.5 px-2 text-white/50 font-mono">{c.cycle}</td>
@@ -1086,10 +1086,10 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                               -${cycleHistory.reduce((s, c) => s + c.fee_hl, 0).toFixed(4)}
                             </td>
                             <td className={`py-2.5 px-2 text-right font-mono font-bold ${
-                              cycleHistory.reduce((s, c) => s + c.net_pnl - c.fee_hl, 0) >= 0 ? 'text-emerald-400' : 'text-red-400'
+                              cycleHistory.reduce((s, c) => s + c.net_pnl, 0) >= 0 ? 'text-emerald-400' : 'text-red-400'
                             }`}>
-                              {cycleHistory.reduce((s, c) => s + c.net_pnl - c.fee_hl, 0) >= 0 ? '+' : ''}
-                              ${cycleHistory.reduce((s, c) => s + c.net_pnl - c.fee_hl, 0).toFixed(4)}
+                              {cycleHistory.reduce((s, c) => s + c.net_pnl, 0) >= 0 ? '+' : ''}
+                              ${cycleHistory.reduce((s, c) => s + c.net_pnl, 0).toFixed(4)}
                             </td>
                             <td className="py-2.5 px-2 text-right text-white/30 font-mono">
                               {(cycleHistory.reduce((s, c) => s + c.hold_minutes, 0) / 60).toFixed(1)}h
