@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { WalletProvider } from './hooks/useWallet';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -132,6 +133,7 @@ function AppContent() {
           </Routes>
         </main>
         <Footer />
+        <Analytics />
       </div>
     </WalletProvider>
   );
