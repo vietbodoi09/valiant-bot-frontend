@@ -53,32 +53,9 @@ export default function SecureMasterKeyAuth({ onAuthenticated }: SecureMasterKey
   
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Check existing token on mount
+  // Check existing token on mount — only check lock status, skip token verify (App.tsx handles it)
   useEffect(() => {
-    const checkExistingAuth = async () => {
-      const savedToken = localStorage.getItem('valiant_jwt_token');
-      const savedExpiry = localStorage.getItem('valiant_token_expiry');
-      
-      if (savedToken && savedExpiry) {
-        const expiry = new Date(savedExpiry);
-        if (expiry > new Date()) {
-          // Verify token with backend
-          try {
-            const response = await fetch(`${AUTH_API_URL}/api/auth/verify-token?token=${savedToken}`);
-            if (response.ok) {
-              setTokenExpiry(expiry);
-              onAuthenticated(savedToken);
-              return;
-            }
-          } catch (e) {
-            console.error('Token verification failed:', e);
-          }
-        }
-        // Clear invalid/expired token
-        localStorage.removeItem('valiant_jwt_token');
-        localStorage.removeItem('valiant_token_expiry');
-      }
-      
+    const initAuth = async () => {
       // Generate device fingerprint
       const fingerprint = await generateDeviceFingerprint();
       setDeviceId(fingerprint.slice(0, 16));
@@ -95,11 +72,15 @@ export default function SecureMasterKeyAuth({ onAuthenticated }: SecureMasterKey
         }
       }
       
+      // Check saved attempts
+      const savedAttempts = localStorage.getItem('valiant_attempts');
+      if (savedAttempts) setAttempts(parseInt(savedAttempts));
+      
       setSecurityLevel('secure');
     };
     
-    checkExistingAuth();
-  }, [onAuthenticated]);
+    initAuth();
+  }, []);
 
   // Token refresh timer
   useEffect(() => {
@@ -161,7 +142,7 @@ export default function SecureMasterKeyAuth({ onAuthenticated }: SecureMasterKey
   };
 
   const verifyKey = useCallback(async () => {
-    if (isLocked || !masterKey.trim()) return;
+    if (isLocked || !masterKey.trim() || isVerifying) return;
     
     setIsVerifying(true);
     setError('');
@@ -170,6 +151,9 @@ export default function SecureMasterKeyAuth({ onAuthenticated }: SecureMasterKey
       const deviceFingerprint = await generateDeviceFingerprint();
       const timestamp = Math.floor(Date.now() / 1000);
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
       const response = await fetch(`${AUTH_API_URL}/api/auth/verify`, {
         method: 'POST',
         headers: { 
@@ -177,26 +161,38 @@ export default function SecureMasterKeyAuth({ onAuthenticated }: SecureMasterKey
           'X-Client-Time': timestamp.toString()
         },
         body: JSON.stringify({
-          master_key: masterKey,
+          master_key: masterKey.trim(),
           device_fingerprint: deviceFingerprint,
           timestamp: timestamp
-        })
+        }),
+        signal: controller.signal
       });
 
-      const data = await response.json();
+      clearTimeout(timeoutId);
+      
+      let data;
+      try {
+        data = await response.json();
+      } catch {
+        setError('Invalid response from server. Please try again.');
+        return;
+      }
 
-      if (response.ok) {
-        // Save token
-        const expiry = new Date(Date.now() + data.expires_in * 1000);
+      if (response.ok && data.access_token) {
+        // Save token FIRST, then notify parent
+        const expiry = new Date(Date.now() + (data.expires_in || 86400) * 1000);
         localStorage.setItem('valiant_jwt_token', data.access_token);
         localStorage.setItem('valiant_token_expiry', expiry.toISOString());
-        localStorage.setItem('valiant_device_id', data.device_id);
+        if (data.device_id) localStorage.setItem('valiant_device_id', data.device_id);
         
         // Reset attempts
         localStorage.removeItem('valiant_attempts');
         setAttempts(0);
         
         setTokenExpiry(expiry);
+        
+        // Small delay to ensure localStorage is committed before parent re-renders
+        await new Promise(r => setTimeout(r, 100));
         onAuthenticated(data.access_token);
       } else {
         const newAttempts = attempts + 1;
