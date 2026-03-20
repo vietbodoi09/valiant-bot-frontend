@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { Analytics } from '@vercel/analytics/react';
 import { WalletProvider } from './hooks/useWallet';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -9,6 +8,7 @@ import BotDashboard from './pages/BotDashboard';
 import SecureMasterKeyAuth from './pages/SecureMasterKeyAuth';
 import AdminDashboard from './pages/AdminDashboard';
 import FundingScanner from './pages/FundingScanner';
+import SwapDashboard from './pages/SwapDashboard';
 
 const AUTH_API_URL = 'https://valiant-bot-be-01.fly.dev';
 
@@ -130,10 +130,21 @@ function AppContent() {
             
             {/* Funding Scanner - public */}
             <Route path="/scan" element={<FundingScannerPage />} />
+            
+            {/* Swap Bot */}
+            <Route 
+              path="/swap" 
+              element={
+                isAuthenticated ? (
+                  <SwapDashboard />
+                ) : (
+                  <SecureMasterKeyAuth onAuthenticated={handleAuthenticated} />
+                )
+              } 
+            />
           </Routes>
         </main>
         <Footer />
-        <Analytics />
       </div>
     </WalletProvider>
   );
