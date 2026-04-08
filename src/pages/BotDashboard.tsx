@@ -378,7 +378,7 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
   const [config, setConfig] = useState(() => {
     const saved = localStorage.getItem('valiant_config');
     if (saved) { try { return JSON.parse(saved); } catch (e) {} }
-    return { mode: 'hedge', symbol: 'BTC', size_usd: 150, leverage: 10, hedge_hold_hours: 8, auto_reenter: true, spam_rounds: 10, spam_interval: 10, cycles: 1 };
+    return { mode: 'hedge', symbol: 'BTC', size_usd: 150, leverage: 10, hedge_hold_hours: 8, auto_reenter: true, spam_rounds: 10, spam_interval: 10, cycles: 1, grid_levels: 5, grid_spacing_pct: 0.05, grid_check_interval: 5 };
   });
 
   useEffect(() => { localStorage.setItem('valiant_api_keys', JSON.stringify(apiKeys)); }, [apiKeys]);
@@ -957,7 +957,7 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
               {/* Action Buttons */}
               <div className="flex flex-wrap gap-3">
                 {!isRunning ? (
-                  <Button onClick={handleStart} disabled={loading || !apiKeys.valiant_agent_key || !apiKeys.lighter_api_key}
+                  <Button onClick={handleStart} disabled={loading || !apiKeys.valiant_agent_key || (config.mode !== 'grid' && !apiKeys.lighter_api_key)}
                     className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-semibold px-8 py-6 text-lg rounded-xl shadow-lg shadow-emerald-500/20">
                     {loading ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Play className="w-5 h-5 mr-2" />}
                     {loading ? 'Starting...' : 'Start Bot'}
@@ -1331,10 +1331,11 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                       <div className="space-y-2">
                         <Label className="text-white/60 text-xs">Mode</Label>
                         <select value={config.mode}
-                          onChange={e => setConfig({...config, mode: e.target.value as 'spam' | 'hedge'})}
+                          onChange={e => setConfig({...config, mode: e.target.value as 'spam' | 'hedge' | 'grid'})}
                           className="w-full px-3 py-2 bg-black border border-white/10 rounded-lg text-white text-sm appearance-none cursor-pointer">
                           <option value="hedge" className="bg-black text-white">Hedge (Delta-Neutral)</option>
                           <option value="spam" className="bg-black text-white">Spam (Volume)</option>
+                          <option value="grid" className="bg-black text-white">Grid (HL Only)</option>
                         </select>
                       </div>
                       <div className="space-y-2">
@@ -1413,6 +1414,33 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                         </div>
                       </div>
                     )}
+                    {config.mode === 'grid' && (
+                      <>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-2">
+                            <Label className="text-white/60 text-xs">Grid Levels (each side)</Label>
+                            <Input type="number" min={2} max={20} value={config.grid_levels || 5}
+                              onChange={e => setConfig({...config, grid_levels: Number(e.target.value)})}
+                              className="bg-white/5 border-white/10 text-white" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-white/60 text-xs">Spacing (%)</Label>
+                            <Input type="number" step={0.01} min={0.01} max={2} value={config.grid_spacing_pct || 0.05}
+                              onChange={e => setConfig({...config, grid_spacing_pct: Number(e.target.value)})}
+                              className="bg-white/5 border-white/10 text-white" />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-white/60 text-xs">Check Interval (sec)</Label>
+                          <Input type="number" min={1} max={60} value={config.grid_check_interval || 5}
+                            onChange={e => setConfig({...config, grid_check_interval: Number(e.target.value)})}
+                            className="bg-white/5 border-white/10 text-white" />
+                        </div>
+                        <div className="p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
+                          <p className="text-[11px] text-emerald-400/70">Grid mode uses HL only — no Lighter API key needed. Places buy orders below and sell orders above current price. Auto-rebalances on fills.</p>
+                        </div>
+                      </>
+                    )}
 
                     <div className="flex items-center gap-3 p-3 rounded-lg bg-white/5">
                       <input type="checkbox" id="autoReenter" checked={config.auto_reenter}
@@ -1424,7 +1452,7 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                     </div>
                     <Separator className="bg-white/10" />
                     {!isRunning ? (
-                      <Button onClick={handleStart} disabled={loading || !apiKeys.valiant_agent_key || !apiKeys.lighter_api_key}
+                      <Button onClick={handleStart} disabled={loading || !apiKeys.valiant_agent_key || (config.mode !== 'grid' && !apiKeys.lighter_api_key)}
                         className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-semibold py-6 rounded-xl shadow-lg shadow-emerald-500/20">
                         {loading ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Play className="w-5 h-5 mr-2" />}
                         {loading ? 'Starting...' : 'Start Bot'}
