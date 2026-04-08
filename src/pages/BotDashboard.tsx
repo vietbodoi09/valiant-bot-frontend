@@ -1351,7 +1351,8 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                           {['BTC','ETH','SOL','HYPE','XRP','DOGE','LINK','AVAX','SUI','PEPE',
                             'APT','ADA','WIF','ONDO','PENGU','KAITO','BERA','TIA','TRUMP',
                             'BNB','ARB','UNI','JUP','ENA','WLD','DOT','FARTCOIN',
-                            'NVDA','HOOD','AAPL','COIN','GOLD'].map(s => (
+                            'NVDA','HOOD','AAPL','COIN','GOLD',
+                            'XYZ100','XYZ400','XYZ900'].map(s => (
                             <option key={s} value={s} />
                           ))}
                         </datalist>
