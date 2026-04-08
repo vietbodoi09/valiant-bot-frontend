@@ -1417,6 +1417,68 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                     )}
                     {config.mode === 'grid' && (
                       <>
+                        {/* Auto Config Button */}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={!apiKeys.valiant_agent_key || !apiKeys.valiant_master_address || loading}
+                          onClick={async () => {
+                            try {
+                              setLoading(true);
+                              const res = await fetch(`${API_URL}/api/balance-check`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                  valiant_agent_key: apiKeys.valiant_agent_key,
+                                  valiant_master_address: apiKeys.valiant_master_address,
+                                }),
+                              });
+                              const data = await res.json();
+                              if (!res.ok) throw new Error(data.detail || 'Failed');
+                              const bal = data.balance || 0;
+                              if (bal < 10) {
+                                alert(`Balance too low: $${bal.toFixed(2)}. Need at least $20.`);
+                                return;
+                              }
+                              // Auto-calculate optimal grid config
+                              // Use 70% of balance as max margin, rest as safety buffer
+                              const usable = bal * 0.7;
+                              const lev = config.leverage || 20;
+                              // Determine levels and size per level
+                              let levels, sizeUsd;
+                              if (usable >= 200) {
+                                levels = 5; sizeUsd = Math.floor((usable * lev) / (levels * 2) / 10) * 10;
+                              } else if (usable >= 100) {
+                                levels = 4; sizeUsd = Math.floor((usable * lev) / (levels * 2) / 10) * 10;
+                              } else if (usable >= 50) {
+                                levels = 3; sizeUsd = Math.floor((usable * lev) / (levels * 2) / 5) * 5;
+                              } else {
+                                levels = 2; sizeUsd = Math.floor((usable * lev) / (levels * 2));
+                              }
+                              sizeUsd = Math.max(sizeUsd, 12); // HL minimum
+                              sizeUsd = Math.min(sizeUsd, 500); // Cap per level
+                              const totalMargin = (levels * 2 * sizeUsd) / lev;
+                              setConfig({
+                                ...config,
+                                size_usd: sizeUsd,
+                                grid_levels: levels,
+                                grid_spacing_pct: 0.05,
+                                grid_check_interval: 5,
+                              });
+                              setBalances(prev => ({ ...prev, hyperliquid: bal }));
+                              addLog(`Auto Config: Balance $${bal.toFixed(2)} → ${levels} levels × $${sizeUsd} = $${totalMargin.toFixed(0)} margin (${((totalMargin/bal)*100).toFixed(0)}% of balance)`);
+                            } catch (e: any) {
+                              alert(`Failed: ${e.message}`);
+                            } finally {
+                              setLoading(false);
+                            }
+                          }}
+                          className="w-full border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10"
+                        >
+                          {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Zap className="w-4 h-4 mr-2" />}
+                          Auto Config (fetch balance & optimize)
+                        </Button>
+
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-2">
                             <Label className="text-white/60 text-xs">Grid Levels (each side)</Label>
