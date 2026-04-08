@@ -7,6 +7,7 @@ import BotDashboard from './pages/BotDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import FundingScanner from './pages/FundingScanner';
 import SwapDashboard from './pages/SwapDashboard';
+import AutoTradeDashboard from './pages/AutoTradeDashboard';
 
 function FundingScannerPage() {
   const navigate = useNavigate();
@@ -47,6 +48,9 @@ function AppContent() {
 
             {/* Swap Bot - open access */}
             <Route path="/swap" element={<SwapDashboard />} />
+
+            {/* AI Auto-Trade */}
+            <Route path="/autotrade" element={<AutoTradeDashboard onLogout={handleLogout} />} />
           </Routes>
         </main>
         <Footer />
