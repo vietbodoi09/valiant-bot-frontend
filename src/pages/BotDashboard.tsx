@@ -378,7 +378,7 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
   const [config, setConfig] = useState(() => {
     const saved = localStorage.getItem('valiant_config');
     if (saved) { try { return JSON.parse(saved); } catch (e) {} }
-    return { mode: 'hedge', symbol: 'BTC', size_usd: 150, leverage: 10, hedge_hold_hours: 8, auto_reenter: true, spam_rounds: 10, spam_interval: 10, cycles: 1, grid_levels: 5, grid_spacing_pct: 0.05, grid_check_interval: 5 };
+    return { mode: 'hedge', symbol: 'BTC', size_usd: 150, leverage: 10, hedge_hold_hours: 8, auto_reenter: true, spam_rounds: 10, spam_interval: 10, cycles: 1, grid_levels: 5, grid_spacing_pct: 0.05, grid_check_interval: 5, grid_range_bps: 0, grid_auto_bps: true, grid_max_orders: 80 };
   });
 
   useEffect(() => { localStorage.setItem('valiant_api_keys', JSON.stringify(apiKeys)); }, [apiKeys]);
@@ -1444,29 +1444,32 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                               // Use 70% of balance as max margin, rest as safety buffer
                               const usable = bal * 0.7;
                               const lev = config.leverage || 20;
-                              // Determine levels and size per level
-                              let levels, sizeUsd;
-                              if (usable >= 200) {
-                                levels = 5; sizeUsd = Math.floor((usable * lev) / (levels * 2) / 10) * 10;
-                              } else if (usable >= 100) {
-                                levels = 4; sizeUsd = Math.floor((usable * lev) / (levels * 2) / 10) * 10;
-                              } else if (usable >= 50) {
-                                levels = 3; sizeUsd = Math.floor((usable * lev) / (levels * 2) / 5) * 5;
+                              // Auto-BPS mode: bot will detect levels at runtime, just optimize size
+                              const isAutoBps = config.grid_auto_bps !== false;
+                              // Estimate levels (bot will recalculate with real volatility)
+                              let levels;
+                              if (isAutoBps) {
+                                // Assume moderate volatility (~20 levels/side), bot overrides
+                                levels = 20;
                               } else {
-                                levels = 2; sizeUsd = Math.floor((usable * lev) / (levels * 2));
+                                levels = config.grid_levels || 5;
                               }
+                              // Size per level: balance * leverage / (levels * 2)
+                              let sizeUsd = Math.floor((usable * lev) / (levels * 2));
                               sizeUsd = Math.max(sizeUsd, 12); // HL minimum
                               sizeUsd = Math.min(sizeUsd, 500); // Cap per level
                               const totalMargin = (levels * 2 * sizeUsd) / lev;
                               setConfig({
                                 ...config,
                                 size_usd: sizeUsd,
-                                grid_levels: levels,
-                                grid_spacing_pct: 0.05,
+                                grid_levels: isAutoBps ? 20 : levels,
+                                grid_auto_bps: isAutoBps,
+                                grid_max_orders: isAutoBps ? 80 : Math.min(levels * 2, 80),
                                 grid_check_interval: 5,
                               });
                               setBalances(prev => ({ ...prev, hyperliquid: bal }));
-                              addLog(`Auto Config: Balance $${bal.toFixed(2)} → ${levels} levels × $${sizeUsd} = $${totalMargin.toFixed(0)} margin (${((totalMargin/bal)*100).toFixed(0)}% of balance)`);
+                              const modeLabel = isAutoBps ? 'Auto-BPS' : 'Manual';
+                              addLog(`Auto Config (${modeLabel}): Balance $${bal.toFixed(2)} → ~${levels} levels × $${sizeUsd} = ~$${totalMargin.toFixed(0)} margin (${((totalMargin/bal)*100).toFixed(0)}% of balance)`);
                             } catch (e: any) {
                               alert(`Failed: ${e.message}`);
                             } finally {
@@ -1479,28 +1482,66 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                           Auto Config (fetch balance & optimize)
                         </Button>
 
+                        {/* Auto BPS Toggle */}
+                        <div className="flex items-center gap-3 p-3 rounded-lg bg-white/5">
+                          <input type="checkbox" id="autoBps" checked={config.grid_auto_bps !== false}
+                            onChange={e => setConfig({...config, grid_auto_bps: e.target.checked, grid_range_bps: e.target.checked ? 0 : (config.grid_range_bps || 500)})}
+                            className="w-4 h-4 rounded border-white/20 bg-white/5 text-emerald-500 focus:ring-emerald-500" />
+                          <Label htmlFor="autoBps" className="text-white/80 text-sm cursor-pointer flex-1">
+                            Auto-detect range from volatility
+                          </Label>
+                        </div>
+
+                        {!config.grid_auto_bps && (
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-2">
+                              <Label className="text-white/60 text-xs">Range (BPS)</Label>
+                              <Input type="number" min={100} max={3000} step={50} value={config.grid_range_bps || 500}
+                                onChange={e => setConfig({...config, grid_range_bps: Number(e.target.value)})}
+                                className="bg-white/5 border-white/10 text-white" />
+                              <p className="text-[10px] text-white/40">1000 bps = ±5% range</p>
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-white/60 text-xs">Levels (each side)</Label>
+                              <Input type="number" min={2} max={40} value={config.grid_levels || 5}
+                                onChange={e => setConfig({...config, grid_levels: Number(e.target.value)})}
+                                className="bg-white/5 border-white/10 text-white" />
+                            </div>
+                          </div>
+                        )}
+
+                        {config.grid_auto_bps !== false && (
+                          <div className="p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
+                            <p className="text-[11px] text-emerald-400/70">Bot will auto-detect volatility from 24h candles and set optimal BPS range + level count. Recalculates on every grid recenter.</p>
+                          </div>
+                        )}
+
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-2">
-                            <Label className="text-white/60 text-xs">Grid Levels (each side)</Label>
-                            <Input type="number" min={2} max={20} value={config.grid_levels || 5}
-                              onChange={e => setConfig({...config, grid_levels: Number(e.target.value)})}
+                            <Label className="text-white/60 text-xs">Max Orders</Label>
+                            <Input type="number" min={4} max={160} value={config.grid_max_orders || 80}
+                              onChange={e => setConfig({...config, grid_max_orders: Number(e.target.value)})}
                               className="bg-white/5 border-white/10 text-white" />
                           </div>
                           <div className="space-y-2">
-                            <Label className="text-white/60 text-xs">Spacing (%)</Label>
+                            <Label className="text-white/60 text-xs">Check Interval (sec)</Label>
+                            <Input type="number" min={1} max={60} value={config.grid_check_interval || 5}
+                              onChange={e => setConfig({...config, grid_check_interval: Number(e.target.value)})}
+                              className="bg-white/5 border-white/10 text-white" />
+                          </div>
+                        </div>
+
+                        {!config.grid_auto_bps && config.grid_range_bps === 0 && (
+                          <div className="space-y-2">
+                            <Label className="text-white/60 text-xs">Spacing (% — simple mode)</Label>
                             <Input type="number" step={0.01} min={0.01} max={2} value={config.grid_spacing_pct || 0.05}
                               onChange={e => setConfig({...config, grid_spacing_pct: Number(e.target.value)})}
                               className="bg-white/5 border-white/10 text-white" />
                           </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-white/60 text-xs">Check Interval (sec)</Label>
-                          <Input type="number" min={1} max={60} value={config.grid_check_interval || 5}
-                            onChange={e => setConfig({...config, grid_check_interval: Number(e.target.value)})}
-                            className="bg-white/5 border-white/10 text-white" />
-                        </div>
+                        )}
+
                         <div className="p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
-                          <p className="text-[11px] text-emerald-400/70">Grid mode uses HL only — no Lighter API key needed. Places buy orders below and sell orders above current price. Auto-rebalances on fills.</p>
+                          <p className="text-[11px] text-emerald-400/70">Grid mode uses HL only — no Lighter API key needed. Supports perps like BTC, ETH, SOL and index tokens like XYZ100 (@100). Auto-rebalances on fills.</p>
                         </div>
                       </>
                     )}
