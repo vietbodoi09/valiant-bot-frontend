@@ -1351,8 +1351,9 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                           {['BTC','ETH','SOL','HYPE','XRP','DOGE','LINK','AVAX','SUI','PEPE',
                             'APT','ADA','WIF','ONDO','PENGU','KAITO','BERA','TIA','TRUMP',
                             'BNB','ARB','UNI','JUP','ENA','WLD','DOT','FARTCOIN',
-                            'NVDA','HOOD','AAPL','COIN','GOLD',
-                            'XYZ100','XYZ400','XYZ900'].map(s => (
+                            'XYZ100',
+                            'xyz:TSLA','xyz:NVDA','xyz:AAPL','xyz:GOOGL','xyz:META','xyz:AMZN',
+                            'xyz:GOLD','xyz:SILVER','xyz:SP500','xyz:BRENTOIL'].map(s => (
                             <option key={s} value={s} />
                           ))}
                         </datalist>
@@ -1541,7 +1542,7 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                         )}
 
                         <div className="p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
-                          <p className="text-[11px] text-emerald-400/70">Grid mode uses HL only — no Lighter API key needed. Supports perps like BTC, ETH, SOL and index tokens like XYZ100 (@100). Auto-rebalances on fills.</p>
+                          <p className="text-[11px] text-emerald-400/70">Grid mode uses HL only — no Lighter API key needed. Standard perps: BTC, ETH, SOL. Builder dex perps: use prefix like xyz:TSLA, xyz:GOLD, xyz:XYZ100 (or just XYZ100). Auto-rebalances on fills.</p>
                         </div>
                       </>
                     )}
