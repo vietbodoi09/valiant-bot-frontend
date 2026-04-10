@@ -378,7 +378,7 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
   const [config, setConfig] = useState(() => {
     const saved = localStorage.getItem('valiant_config');
     if (saved) { try { return JSON.parse(saved); } catch (e) {} }
-    return { mode: 'hedge', symbol: 'BTC', size_usd: 150, leverage: 10, hedge_hold_hours: 8, auto_reenter: true, spam_rounds: 10, spam_interval: 10, cycles: 1, grid_levels: 5, grid_spacing_pct: 0.05, grid_check_interval: 5, grid_range_bps: 0, grid_auto_bps: true, grid_max_orders: 80 };
+    return { mode: 'hedge', symbol: 'BTC', size_usd: 150, leverage: 10, hedge_hold_hours: 8, auto_reenter: true, spam_rounds: 10, spam_interval: 10, cycles: 1, grid_levels: 5, grid_spacing_pct: 0.05, grid_check_interval: 5, grid_range_bps: 0, grid_auto_bps: true, grid_max_orders: 80, grid_max_runtime_hours: 0, grid_take_profit_usd: 0, grid_stop_loss_usd: 0 };
   });
 
   useEffect(() => { localStorage.setItem('valiant_api_keys', JSON.stringify(apiKeys)); }, [apiKeys]);
@@ -1540,6 +1540,30 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                               className="bg-white/5 border-white/10 text-white" />
                           </div>
                         )}
+
+                        <Separator className="bg-white/10" />
+                        <p className="text-white/50 text-xs font-medium uppercase tracking-wider">Auto-Stop Conditions</p>
+                        <div className="grid grid-cols-3 gap-3">
+                          <div className="space-y-2">
+                            <Label className="text-white/60 text-xs">Max Runtime (h)</Label>
+                            <Input type="number" min={0} max={168} step={0.5} value={config.grid_max_runtime_hours || 0}
+                              onChange={e => setConfig({...config, grid_max_runtime_hours: Number(e.target.value)})}
+                              className="bg-white/5 border-white/10 text-white" placeholder="0 = no limit" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-white/60 text-xs">Take Profit ($)</Label>
+                            <Input type="number" min={0} step={0.5} value={config.grid_take_profit_usd || 0}
+                              onChange={e => setConfig({...config, grid_take_profit_usd: Number(e.target.value)})}
+                              className="bg-white/5 border-white/10 text-white" placeholder="0 = off" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-white/60 text-xs">Stop Loss ($)</Label>
+                            <Input type="number" min={0} step={0.5} value={config.grid_stop_loss_usd || 0}
+                              onChange={e => setConfig({...config, grid_stop_loss_usd: Number(e.target.value)})}
+                              className="bg-white/5 border-white/10 text-white" placeholder="0 = off" />
+                          </div>
+                        </div>
+                        <p className="text-[10px] text-white/40">Set to 0 to disable. Bot runs until manual stop if all are 0.</p>
 
                         <div className="p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
                           <p className="text-[11px] text-emerald-400/70">Grid mode uses HL only — no Lighter API key needed. Standard perps: BTC, ETH, SOL. Builder dex perps: use prefix like xyz:TSLA, xyz:GOLD, xyz:XYZ100 (or just XYZ100). Auto-rebalances on fills.</p>
