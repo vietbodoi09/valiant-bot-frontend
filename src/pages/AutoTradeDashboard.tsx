@@ -18,6 +18,7 @@ import AIRiskPanel from '@/components/ai/AIRiskPanel';
 import AIPerformanceChart from '@/components/ai/AIPerformanceChart';
 import AIMarketContext from '@/components/ai/AIMarketContext';
 import AIPositionManager from '@/components/ai/AIPositionManager';
+import AIPipelineProgress from '@/components/ai/AIPipelineProgress';
 
 const API_URL = 'https://valiant-bot-be-01.fly.dev';
 
@@ -72,6 +73,8 @@ export default function AutoTradeDashboard({ onLogout }: AutoTradeDashboardProps
   const [marketCandidates, setMarketCandidates] = useState<any[]>([]);
   const [logs, setLogs] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState('strategy');
+  const [pipelineStages, setPipelineStages] = useState<Record<string, any>>({});
+  const [pipelineActive, setPipelineActive] = useState(false);
 
   // WebSocket
   const wsRef = useRef<WebSocket | null>(null);
@@ -160,6 +163,14 @@ export default function AutoTradeDashboard({ onLogout }: AutoTradeDashboardProps
         break;
       case 'ai_market':
         setMarketCandidates(msg.data || []);
+        break;
+      case 'ai_pipeline_progress':
+        setPipelineStages(prev => ({ ...prev, [msg.data.stage]: msg.data }));
+        setPipelineActive(msg.data.stage === 'indicator' && msg.data.status === 'running'
+          ? true
+          : msg.data.stage === 'decision' && msg.data.status !== 'running'
+          ? false
+          : pipelineActive);
         break;
       case 'state':
         if (msg.data) {
@@ -389,6 +400,7 @@ export default function AutoTradeDashboard({ onLogout }: AutoTradeDashboardProps
         </TabsContent>
 
         <TabsContent value="decisions">
+          <AIPipelineProgress stages={pipelineStages} isActive={pipelineActive} />
           {sessionId ? (
             <AIDecisionLog sessionId={sessionId} realtimeDecisions={realtimeDecisions} />
           ) : (

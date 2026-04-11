@@ -18,7 +18,7 @@ const Header = () => {
     { path: '/', label: 'Home', icon: Home },
     { path: '/scan', label: 'Scanner', icon: Scan },
     { path: '/bot', label: 'Terminal', icon: Bot },
-    // { path: '/autotrade', label: 'AI Trade', icon: Brain },  // Hidden until ready for public release
+    { path: '/autotrade', label: 'AI Trade', icon: Brain },
   ];
 
   const isActive = (path: string) => location.pathname === path;

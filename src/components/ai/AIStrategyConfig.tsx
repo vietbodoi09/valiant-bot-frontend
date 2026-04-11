@@ -278,6 +278,7 @@ export default function AIStrategyConfig({ config, onChange, disabled }: AIStrat
               { key: 'enable_hedge_mode', label: 'Delta-Neutral Hedge' },
               { key: 'enable_funding_arb', label: 'Funding Arbitrage' },
               { key: 'enable_grid_mode', label: 'Grid Trading' },
+              { key: 'enable_pipeline_mode', label: 'Multi-Agent Pipeline' },
               { key: 'dry_run', label: 'Dry Run (Paper)' },
             ].map(toggle => (
               <button key={toggle.key} onClick={() => update(toggle.key, !config[toggle.key])} disabled={disabled}
@@ -292,6 +293,41 @@ export default function AIStrategyConfig({ config, onChange, disabled }: AIStrat
               </button>
             ))}
           </div>
+
+          {/* Pipeline sub-options */}
+          {config.enable_pipeline_mode && (
+            <div className="pt-2 pl-2 border-l-2 border-purple-500/20 space-y-2">
+              <p className="text-[10px] text-purple-400/60 font-medium uppercase tracking-wider">Pipeline Agents</p>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { key: 'enable_pattern_agent', label: 'Pattern Agent (Vision)' },
+                  { key: 'enable_trend_agent', label: 'Trend Agent (Vision)' },
+                ].map(toggle => (
+                  <button key={toggle.key} onClick={() => update(toggle.key, config[toggle.key] === false ? true : !(config[toggle.key] ?? true))} disabled={disabled}
+                    className={cn(
+                      "px-3 py-1.5 rounded-full text-xs font-medium border transition-all",
+                      (config[toggle.key] ?? true)
+                        ? "bg-purple-500/15 border-purple-500/30 text-purple-400"
+                        : "bg-white/[0.02] border-white/[0.06] text-white/40",
+                      disabled && "opacity-50"
+                    )}>
+                    {toggle.label}
+                  </button>
+                ))}
+              </div>
+              <div>
+                <Label className="text-xs text-white/50">Vision Model Override (optional)</Label>
+                <select value={config.pipeline_vision_model || ''} onChange={e => update('pipeline_vision_model', e.target.value || null)}
+                  disabled={disabled}
+                  className="w-full mt-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white/80 outline-none">
+                  <option value="">Same as main model</option>
+                  {AI_MODELS.filter(m => ['claude-sonnet', 'claude-haiku', 'claude-opus', 'gpt-4o', 'gpt-4o-mini'].includes(m.id)).map(m => (
+                    <option key={m.id} value={m.id}>{m.name} ({m.cost})</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
