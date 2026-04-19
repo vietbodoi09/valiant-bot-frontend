@@ -1398,6 +1398,83 @@ export default function BotDashboard({ onLogout, authToken: _authToken, keyName:
                           />
                           <p className="text-[10px] text-white/40">Bot will stop after completing this many cycles</p>
                         </div>
+
+                        {/* ─── Funding-Arb Protections (cryppimagic article) ─── */}
+                        <Separator className="bg-white/10 col-span-2" />
+                        <div className="col-span-2">
+                          <p className="text-white/50 text-xs font-medium uppercase tracking-wider mb-2">Advanced Protections</p>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-2">
+                              <Label className="text-white/60 text-xs">Max Book Spread (%)</Label>
+                              <Input type="number" step={0.05} min={0.05} max={5}
+                                value={((config.max_book_spread_pct ?? 0.005) * 100).toFixed(2)}
+                                onChange={e => setConfig({...config, max_book_spread_pct: Number(e.target.value) / 100})}
+                                className="bg-white/5 border-white/10 text-white" placeholder="0.5" />
+                              <p className="text-[10px] text-white/40">Skip entry if bid-ask spread wider than this</p>
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-white/60 text-xs">SL Buffer from Liq (%)</Label>
+                              <Input type="number" step={1} min={5} max={50}
+                                value={((config.sl_buffer_from_liq_pct ?? 0.10) * 100).toFixed(0)}
+                                onChange={e => setConfig({...config, sl_buffer_from_liq_pct: Number(e.target.value) / 100})}
+                                className="bg-white/5 border-white/10 text-white" placeholder="10" />
+                              <p className="text-[10px] text-white/40">Exit X% before liquidation price</p>
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-white/60 text-xs">ADL Mismatch Threshold (%)</Label>
+                              <Input type="number" step={5} min={5} max={50}
+                                value={((config.adl_size_mismatch_threshold ?? 0.20) * 100).toFixed(0)}
+                                onChange={e => setConfig({...config, adl_size_mismatch_threshold: Number(e.target.value) / 100})}
+                                className="bg-white/5 border-white/10 text-white" placeholder="20" />
+                              <p className="text-[10px] text-white/40">Close all if leg size drops by X% (force-close)</p>
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-white/60 text-xs">Min Funding Stability (0-1)</Label>
+                              <Input type="number" step={0.05} min={0} max={1}
+                                value={config.min_stability_score ?? 0.30}
+                                onChange={e => setConfig({...config, min_stability_score: Number(e.target.value)})}
+                                className="bg-white/5 border-white/10 text-white" placeholder="0.30" />
+                              <p className="text-[10px] text-white/40">Reject setups with unstable funding history (24h)</p>
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-white/60 text-xs">Funding Re-check Interval (min)</Label>
+                              <Input type="number" step={5} min={5} max={120}
+                                value={config.funding_flip_check_interval_min ?? 30}
+                                onChange={e => setConfig({...config, funding_flip_check_interval_min: Number(e.target.value)})}
+                                className="bg-white/5 border-white/10 text-white" placeholder="30" />
+                              <p className="text-[10px] text-white/40">Exit early if funding direction reverses</p>
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-white/60 text-xs">OI Capacity Buffer (%)</Label>
+                              <Input type="number" step={5} min={0} max={50}
+                                value={((config.oi_capacity_buffer ?? 0.20) * 100).toFixed(0)}
+                                onChange={e => setConfig({...config, oi_capacity_buffer: Number(e.target.value) / 100})}
+                                className="bg-white/5 border-white/10 text-white" placeholder="20" />
+                              <p className="text-[10px] text-white/40">Headroom needed in HL OI cap</p>
+                            </div>
+                          </div>
+
+                          {/* Toggles */}
+                          <div className="grid grid-cols-2 gap-2 mt-3">
+                            {[
+                              { key: 'enable_mirrored_sl_tp', label: 'Mirrored SL/TP Band Exit' },
+                              { key: 'place_hl_trigger_orders', label: 'HL Safety Trigger Orders' },
+                              { key: 'enable_adl_detection', label: 'ADL Detection' },
+                              { key: 'enable_funding_flip_exit', label: 'Funding Flip Exit' },
+                              { key: 'enable_funding_stability_check', label: 'Funding Stability Pre-Check' },
+                              { key: 'enable_oi_capacity_check', label: 'OI Capacity Pre-Check' },
+                              { key: 'time_spread_mode', label: 'Time Spread Mode (exit pre-funding)' },
+                            ].map(t => (
+                              <label key={t.key} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 cursor-pointer">
+                                <input type="checkbox"
+                                  checked={config[t.key] ?? (t.key !== 'time_spread_mode')}
+                                  onChange={e => setConfig({...config, [t.key]: e.target.checked})}
+                                  className="w-4 h-4 rounded border-white/20 bg-white/5 text-emerald-500" />
+                                <span className="text-white/70 text-xs">{t.label}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
                       </>
                     )}
                     {config.mode === 'spam' && (
